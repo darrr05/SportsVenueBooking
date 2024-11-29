@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SportsVenueBooking.Data;
 
@@ -11,9 +12,11 @@ using SportsVenueBooking.Data;
 namespace SportsVenueBooking.Migrations
 {
     [DbContext(typeof(SportsVenueBookingContext))]
-    partial class SportsVenueBookingContextModelSnapshot : ModelSnapshot
+    [Migration("20241129065732_SeedUserRole")]
+    partial class SeedUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
