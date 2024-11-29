@@ -1,0 +1,89 @@
+﻿@page "/bookings/create"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Bookings</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Bookings" OnValidSubmit="AddBookings" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="sportname" class="form-label">SportName:</label> 
+                <InputText id="sportname" @bind-Value="Bookings.SportName" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.SportName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="locationname" class="form-label">LocationName:</label> 
+                <InputText id="locationname" @bind-Value="Bookings.LocationName" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.LocationName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="timeslotdescription" class="form-label">TimeslotDescription:</label> 
+                <InputText id="timeslotdescription" @bind-Value="Bookings.TimeslotDescription" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.TimeslotDescription" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="sportid" class="form-label">SportId:</label> 
+                <InputNumber id="sportid" @bind-Value="Bookings.SportId" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.SportId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="locationid" class="form-label">LocationId:</label> 
+                <InputNumber id="locationid" @bind-Value="Bookings.LocationId" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.LocationId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="timeslotid" class="form-label">TimeslotId:</label> 
+                <InputNumber id="timeslotid" @bind-Value="Bookings.TimeslotId" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.TimeslotId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="datecreated" class="form-label">DateCreated:</label> 
+                <InputDate id="datecreated" @bind-Value="Bookings.DateCreated" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.DateCreated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dateupdated" class="form-label">DateUpdated:</label> 
+                <InputDate id="dateupdated" @bind-Value="Bookings.DateUpdated" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.DateUpdated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="createdby" class="form-label">CreatedBy:</label> 
+                <InputText id="createdby" @bind-Value="Bookings.CreatedBy" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.CreatedBy" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="updatedby" class="form-label">UpdatedBy:</label> 
+                <InputText id="updatedby" @bind-Value="Bookings.UpdatedBy" class="form-control" /> 
+                <ValidationMessage For="() => Bookings.UpdatedBy" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/bookings">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Bookings Bookings { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddBookings()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Bookings.Add(Bookings);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/bookings");
+    }
+}
