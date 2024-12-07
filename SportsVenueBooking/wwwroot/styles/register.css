@@ -1,0 +1,53 @@
+﻿/* Overall layout */
+.register-page {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; /* Align items to the top */
+    justify-content: center;
+    padding: 20px;
+    height: 100vh;
+    background-color: #f8f9fa; /* Optional background color */
+}
+
+/* Logo Section */
+.logo {
+    margin-right: 20px; /* Space between logo and form */
+    text-align: left;
+}
+
+    .logo img {
+        max-width: 120px;
+        height: auto;
+    }
+
+/* Registration Form */
+.register-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Styling for links */
+.text-center a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+    .text-center a:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+
+/* Buttons */
+button {
+    margin-top: 20px;
+}
+
+.external-auth-section {
+    margin-top: 2rem; /* Add margin top for spacing */
+    text-align: center;
+}

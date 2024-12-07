@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using CarRentalManagement.Configurations.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SportsVenueBooking.Configurations.Entities;
 using SportsVenueBooking.Data;
@@ -22,6 +23,9 @@ namespace SportsVenueBooking.Data
 			builder.ApplyConfiguration(new LocationSeed());
 			builder.ApplyConfiguration(new SportSeed());
 			builder.ApplyConfiguration(new TimeslotSeed());
+			builder.ApplyConfiguration(new UserSeed());
+			builder.ApplyConfiguration(new UserRoleSeed());
+			builder.ApplyConfiguration(new RoleSeed());
 		}
 	}
 }

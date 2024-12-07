@@ -1,16 +1,23 @@
 ﻿@page "/"
 @using System
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
-
 
 <header class="header">
     <div class="logo">SPORTSLOT</div>
     <nav>
         <ul>
-            <li><a href="#">Promotions</a></li>
-            <li><a href="#">Bookings</a></li>
-            <li><a href="#">About Us</a></li>
+            <li>
+                <NavLink href="/Promotions" @onclick='() => Navigate("/Promotions")'>Promotions</NavLink>
+            </li>
+            <li>
+                <NavLink href="/Bookings_Sport" @onclick='() => Navigate("/Bookings_Sport")'>Bookings</NavLink>
+            </li>
+            <li>
+                <NavLink href="/About Us" @onclick='() => Navigate("/About Us")'>About Us</NavLink>
+            </li>
         </ul>
     </nav>
 </header>
@@ -19,7 +26,7 @@
     <div class="banner-text">
         <h1>Train Hard<br />Play Hard</h1>
         <p>Details Of Different Plans (Monthly, Yearly, Family, etc...)</p>
-        <a href="#" class="btn">Book Now</a>
+        <NavLink href="/Bookings_Sport" button class="btn" @onclick='() => Navigate("/Bookings_Sport")'>Book Now</NavLink>
     </div>
 </div>
 
@@ -39,6 +46,34 @@
     &copy; @DateTime.Now.Year SportsSlot. All Rights Reserved.
 </footer>
 
-<a href="#" class="bottom-login">Login</a>
+<AuthorizeView>
 
+    <NotAuthorized>
+        <NavLink href="/Account/Login" class="bottom-login">Login</NavLink>
+    </NotAuthorized>
+</AuthorizeView>
 
+@code {
+    private async Task Navigate(string targetUrl, bool requiresAuth = false)
+    {
+        if (requiresAuth)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                NavigationManager.NavigateTo(targetUrl);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/Account/Login");
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo(targetUrl);
+        }
+    }
+
+}

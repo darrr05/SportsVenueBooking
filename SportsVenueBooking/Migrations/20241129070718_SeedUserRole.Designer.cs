@@ -12,7 +12,7 @@ using SportsVenueBooking.Data;
 namespace SportsVenueBooking.Migrations
 {
     [DbContext(typeof(SportsVenueBookingContext))]
-    [Migration("20241129065732_SeedUserRole")]
+    [Migration("20241129070718_SeedUserRole")]
     partial class SeedUserRole
     {
         /// <inheritdoc />
@@ -50,6 +50,20 @@ namespace SportsVenueBooking.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "ad2bcf0c-20db-474f-8407-5a6b159518ba",
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            Id = "bd2bcf0c-20db-474f-8407-5a6b159518bb",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -137,6 +151,13 @@ namespace SportsVenueBooking.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "3781efa7-66dc-47f0-860f-e506d04102e4",
+                            RoleId = "ad2bcf0c-20db-474f-8407-5a6b159518ba"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -227,6 +248,26 @@ namespace SportsVenueBooking.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "3781efa7-66dc-47f0-860f-e506d04102e4",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e12013fc-f5a9-4782-97cd-4a1bae568c04",
+                            Email = "admin@localhost.com",
+                            EmailConfirmed = true,
+                            FirstName = "Admin",
+                            LastName = "User",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@LOCALHOST.COM",
+                            NormalizedUserName = "ADMIN@LOCALHOST.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAENhuUs697jMq246pPU73hJ8+MzPFM6tbKJmvyWFl27tc8NC8nDjGLMKQExyzBbsSMg==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "b092cb79-fed4-4fb0-9630-47381ca4384f",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@localhost.com"
+                        });
                 });
 
             modelBuilder.Entity("SportsVenueBooking.Domain.Bookings", b =>
@@ -366,8 +407,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 1,
                             Address = "5 Bishan St 14, Singapore 579783",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(4820),
-                            DateUpdated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(4837),
+                            DateCreated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(669),
+                            DateUpdated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(686),
                             Name = "Bishan Sports Hall",
                             UpdatedBy = "System"
                         },
@@ -376,8 +417,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 2,
                             Address = "57 Anchorvale Rd, Singapore 544964",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(4840),
-                            DateUpdated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(4842),
+                            DateCreated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(691),
+                            DateUpdated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(692),
                             Name = "Sengkang Sports Hall",
                             UpdatedBy = "System"
                         });
@@ -416,8 +457,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(5227),
-                            DateUpdated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(5228),
+                            DateCreated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(1207),
+                            DateUpdated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(1209),
                             Name = "Badminton",
                             UpdatedBy = "System"
                         },
@@ -425,8 +466,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 2,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(5231),
-                            DateUpdated = new DateTime(2024, 11, 29, 14, 57, 30, 266, DateTimeKind.Local).AddTicks(5232),
+                            DateCreated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(1312),
+                            DateUpdated = new DateTime(2024, 11, 29, 15, 7, 15, 903, DateTimeKind.Local).AddTicks(1313),
                             Name = "Basketball",
                             UpdatedBy = "System"
                         });

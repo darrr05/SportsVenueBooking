@@ -17,7 +17,8 @@ namespace SportsVenueBooking.Configurations.Entities
 					DateCreated = DateTime.Now,
 					DateUpdated = DateTime.Now,
 					CreatedBy = "System",
-					UpdatedBy = "System"
+					UpdatedBy = "System",
+					capacity = "5000"
 				},
 				new Location
 				{
@@ -27,7 +28,8 @@ namespace SportsVenueBooking.Configurations.Entities
 					DateCreated = DateTime.Now,
 					DateUpdated = DateTime.Now,
 					CreatedBy = "System",
-					UpdatedBy = "System"
+					UpdatedBy = "System",
+					capacity = "2000"
 				});
 		}
 	}

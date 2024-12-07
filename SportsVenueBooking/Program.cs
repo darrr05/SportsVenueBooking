@@ -34,7 +34,8 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<SportsVenueBookingContext>()
+	.AddRoles<IdentityRole>()
+	.AddEntityFrameworkStores<SportsVenueBookingContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 

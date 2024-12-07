@@ -12,12 +12,14 @@ namespace SportsVenueBooking.Configurations.Entities
 				new Timeslot
 				{
 					Id = 1,
-					Description = "08:00 AM - 09:00 AM"
+					Description = "08:00 AM - 09:00 AM",
+					AvailableSlots = 1
 				},
 				new Timeslot
 				{
 					Id = 2,
-					Description = "09:00 AM - 10:00 AM"
+					Description = "09:00 AM - 10:00 AM",
+					AvailableSlots = 1
 				});
 		}
 	}

@@ -14,14 +14,24 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject RoleManager<IdentityRole> RoleManager
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<!-- Reference to the custom CSS -->
+<head>
+    <link rel="stylesheet" href="styles/register.css">
+</head>
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
+<div class="register-page">
+    <!-- Logo Section -->
+    <div class="logo">
+        <img src="images/logo.jpg" alt="Sports Venue Logo" />
+    </div>
+
+    <!-- Registration Form Section -->
+    <div class="register-container">
+        <h1>Register</h1>
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
             <h2>Create a new account.</h2>
@@ -32,6 +42,20 @@
                 <label for="email">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" class="form-control"
+                           autocomplete="firstname" aria-required="true" placeholder="Bill" />
+                <label for="firstname">First Name</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" class="form-control"
+                           autocomplete="lastname" aria-required="true" placeholder="Gates" />
+                <label for="lastname">Last Name</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label for="password">Password</label>
@@ -44,14 +68,20 @@
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
+
+        <!-- Add "Already have an account?" link -->
+        <p class="text-center mt-3">
+            Already have an account? <a href="/Account/Login">Log in</a>
+        </p>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
+</div>
+
+<div class="external-auth-section">
+    <section>
+        <h3>Use another service to register.</h3>
+        <hr />
+        <ExternalLoginPicker />
+    </section>
 </div>
 
 @code {
@@ -72,6 +102,10 @@
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+        user.FirstName = Input.FirstName;
+        user.LastName = Input.LastName;
+
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
@@ -79,6 +113,17 @@
             identityErrors = result.Errors;
             return;
         }
+
+        //create the user role if it doesn't exist
+        if (!await RoleManager.RoleExistsAsync("User"))
+        {
+            await RoleManager.CreateAsync(new IdentityRole("User"));
+        }
+        //add the user to the user role
+        await UserManager.AddToRoleAsync(user, "User");
+        //add the user id as claim when user registers
+        await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId",
+        user.Id));
 
         Logger.LogInformation("User created a new account with password.");
 
@@ -130,6 +175,14 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; } = "";
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
