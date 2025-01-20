@@ -4,6 +4,7 @@
 @using SportsVenueBooking.Domain
 @using SportsVenueBooking.Data
 @implements IAsyncDisposable
+@rendermode InteractiveServer
 @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
 
 <PageTitle>Index</PageTitle>
@@ -14,13 +15,11 @@
     <a href="bookings/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Bookings">
-    <PropertyColumn Property="bookings => bookings.SportName" />
-    <PropertyColumn Property="bookings => bookings.LocationName" />
-    <PropertyColumn Property="bookings => bookings.TimeslotDescription" />
-    <PropertyColumn Property="bookings => bookings.SportId" />
-    <PropertyColumn Property="bookings => bookings.LocationId" />
-    <PropertyColumn Property="bookings => bookings.TimeslotId" />
+<QuickGrid Class="table" Items="FilteredBookings">
+    <PropertyColumn Property="bookings => bookings.DateOut" Sortable="true" Format="dd/MM/yyyy" />
+    <PropertyColumn Property="bookings => bookings.DateIn" Sortable="true" Format="dd/MM/yyyy" />
+    <PropertyColumn Property="bookings => bookings.ScheduleId" Sortable="true" />
+    <PropertyColumn Property="bookings => bookings.CustomerId" Sortable="true" />
     <PropertyColumn Property="bookings => bookings.DateCreated" />
     <PropertyColumn Property="bookings => bookings.DateUpdated" />
     <PropertyColumn Property="bookings => bookings.CreatedBy" />
@@ -36,9 +35,44 @@
 @code {
     private SportsVenueBookingContext context = default!;
 
-    protected override void OnInitialized()
+    //Declare and initialize IList and Dictionaries
+    private IList<Schedule> Schedules;
+    private IList<Customer> Customers;
+    private Dictionary<int, SportLocation> SportLocationsDict = new Dictionary<int, SportLocation>();
+    private Dictionary<int, Timeslot> TimeslotsDict = new Dictionary<int, Timeslot>();
+
+    private string userId = string.Empty;
+    private bool isAdmin = false;
+    @inject AuthenticationStateProvider authenticationStateProvider
+    // Filter bookings by userId
+    private IQueryable<Bookings> FilteredBookings => isAdmin
+    ? context.Bookings // Admins can see all bookings
+    : context.Bookings.Where(e => e.CreatedBy == userId); // Regular users see only their own bookings
+
+    protected override async Task OnInitializedAsync()
     {
+        // Fetch the authentication state
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Extract user information
+        userId = user.FindFirst("userId")?.Value ?? string.Empty;
+        isAdmin = user.IsInRole("Administrator");
         context = DbFactory.CreateDbContext();
+    }
+    // GetVehicleString method to get the vehicle string
+    private string GetScheduleString(int scheduleId)
+    {
+        var schedule = Schedules.FirstOrDefault(s => s.Id == scheduleId);
+        return schedule == null ? string.Empty :
+        $"{SportLocationsDict[schedule.SportLocationId].Id} { TimeslotsDict[schedule.TimeslotId].Description}";
+    }
+
+    // GetCustomerString method to get the customer string
+    private string GetCustomerString(int customerId)
+    {
+        var customer = Customers.FirstOrDefault(c => c.Id == customerId);
+        return customer == null ?
+        string.Empty : $"{customer.Email} - Contact:{customer.PhoneNumber}";
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

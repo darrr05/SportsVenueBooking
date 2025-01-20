@@ -1,7 +1,160 @@
 ﻿@page "/Checkout"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@using System.Security.Claims
+@rendermode InteractiveServer
 
-<h3>Checkout</h3>
+<head>
+    <link rel="stylesheet" href="styles/Checkout.css">
+</head>
+
+<div class="container">
+    <div class="header">
+        <img src="images/logo.jpg" alt="SportsSlot Logo" class="logo" />
+        <h1>SPORTSLOT</h1>
+    </div>
+
+    <div class="checkout-summary">
+        <h3>Booking Summary</h3>
+        <div class="summary-item">
+            <span>Sport:</span>
+            <span>@SelectedSportName</span>
+        </div>
+        <div class="summary-item">
+            <span>Location:</span>
+            <span>@SelectedLocationName</span>
+        </div>
+        <div class="summary-item">
+            <span>Time:</span>
+            <span>@SelectedTimeslotDescription</span>
+            <span>@SelectedDate.ToString("yyyy-MM-dd")</span>
+        </div>
+        <div class="summary-item">
+            <span>Price:</span>
+            <span>@TimeslotPrice.ToString("C2")</span> <!-- Display the price here -->
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h3>Payment</h3>
+        <div id="payment-element"></div>
+        <button class="pay-button" @onclick="ProcessPayment" id="pay-button" disabled="@(!IsPaymentButtonEnabled)">Pay Now</button>
+        <div id="payment-message" style="display:none;"></div>
+    </div>
+
+    <div class="navigation">
+        <button class="back-button" @onclick="NavigateBack">Back</button>
+    </div>
+</div>
 
 @code {
+    private string SelectedSportName { get; set; }
+    private string SelectedLocationName { get; set; }
+    private string SelectedTimeslotDescription { get; set; }
+    private DateTime SelectedDate { get; set; }
+    private bool IsFirstRender { get; set; } = true;
+    private decimal TimeslotPrice { get; set; }
+    private bool IsPaymentButtonEnabled { get; set; } = false;
+    private string CustomerId { get; set; } // Updated variable name
 
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private SportsVenueBookingContext DbContext { get; set; }
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get the customer ID when the component initializes
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        CustomerId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(CustomerId))
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && IsFirstRender)
+        {
+            IsFirstRender = false;
+
+            // Retrieve stored session values
+            SelectedSportName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedSport");
+            SelectedLocationName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedLocation");
+            SelectedTimeslotDescription = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedTimeslot");
+
+            var selectedDateString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedDate");
+            if (!string.IsNullOrEmpty(selectedDateString))
+            {
+                SelectedDate = DateTime.Parse(selectedDateString);
+            }
+
+            var priceString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "TimeslotPrice");
+            if (decimal.TryParse(priceString, out var price))
+            {
+                TimeslotPrice = price;
+            }
+
+            if (string.IsNullOrEmpty(SelectedSportName) ||
+                string.IsNullOrEmpty(SelectedLocationName) ||
+                string.IsNullOrEmpty(SelectedTimeslotDescription))
+            {
+                NavigationManager.NavigateTo("/Bookings_Sport");
+                return;
+            }
+
+            IsPaymentButtonEnabled = true;
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/Bookings_Timeslot");
+    }
+
+    private async Task ProcessPayment()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(CustomerId))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Please log in to complete your booking.");
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            // Create the booking with the actual customer ID
+            var booking = new Bookings
+                {
+                    CustomerId = int.Parse(CustomerId), // Ensure this matches your type
+                    SportName = SelectedSportName,
+                    LocationName = SelectedLocationName,
+                    TimeslotDescription = SelectedTimeslotDescription,
+                    BookingDate = SelectedDate,
+                    TotalAmount = TimeslotPrice,
+                    BookingStatus = "Paid"
+                };
+
+            // Save the booking
+            await DbContext.Bookings.AddAsync(booking);
+            await DbContext.SaveChangesAsync();
+
+            // Clear the session storage
+            await JSRuntime.InvokeVoidAsync("sessionStorage.clear");
+
+            // Show success message and redirect
+            await JSRuntime.InvokeVoidAsync("alert", "Payment successful! Redirecting to dashboard...");
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during payment processing: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", "An unexpected error occurred. Please try again later.");
+        }
+    }
 }

@@ -1,0 +1,88 @@
+﻿.promotions-container {
+    background-color: #0f2740;
+    color: white; /* Set all text color to white */
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centers the content horizontally */
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 120px;
+    height: auto;
+    margin-right: 20px; /* Spacing between the logo and title */
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    text-align: center; /* Centers the text block */
+    background-color: transparent; /* Ensure no background color */
+    border: none; /* Remove any unintended borders */
+    color: white; /* Ensure the text color is white */
+}
+
+
+.description {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.discount-info {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.highlight {
+    color: #FFD700; /* Vibrant yellow for the highlight */
+    font-weight: bold; /* Make the text bold */
+    font-style: italic; /* Italicize to emphasize */
+    background-color: #444444; /* Optional: Add a subtle dark background for contrast */
+    padding: 2px 4px; /* Add padding for better readability */
+    border-radius: 3px; /* Smooth the edges */
+}
+
+.promotion-image {
+    width: 20%;
+    margin: 20px 0;
+}
+
+.back-link {
+    color: white; /* Ensure link is also white */
+    text-decoration: none;
+    font-size: 1rem;
+    margin-top: 15px;
+    display: block; /* Ensure it appears as a block to move below the image */
+    margin-bottom: 0; /* Aligns properly under the image */
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+/* Floating Login Button */
+.bottom-login {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #000;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+    .bottom-login:hover {
+        background-color: #444;
+    }

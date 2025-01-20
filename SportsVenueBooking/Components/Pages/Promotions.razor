@@ -1,7 +1,28 @@
 ﻿@page "/Promotions"
 
-<h3>Promotions</h3>
+<head>
+    <link rel="stylesheet" href="styles/Promotions.css">
+</head>
 
-@code {
+<div class="promotions-container">
+    <div class="header">
+        <img src="images/logo.jpg" alt="Sports For You Logo" class="logo" />
+        <h1 class="title">Merdeka Generation Promotion</h1>
+    </div>
+    <p class="description">
+        The Merdeka Generation Package supports the MG seniors in their silver years, helping them
+        to stay active and healthy, and provides better peace of mind over future healthcare costs.
+    </p>
+    <p class="discount-info">
+        The Merdeka Generation Package currently comprises that as long you are 50 years old and above,
+        you can key in <span class="highlight">"Merdeka"</span> to have a 10% discount on all your bookings.
+    </p>
+    <img src="images/Merdeka_generation.png" alt="Merdeka Generation" class="promotion-image" />
 
-}
+    <a href="/" class="back-link">Back To Home</a>
+    <AuthorizeView>
+        <NotAuthorized>
+            <NavLink href="/Account/Login" class="bottom-login">Login</NavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>

@@ -1,0 +1,138 @@
+﻿@page "/locations/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Location</h2>
+<hr />
+@if (Location is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Location" OnValidSubmit="UpdateLocation" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Location.Id" value="@Location.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Location.Name" class="form-control" />
+                    <ValidationMessage For="() => Location.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address:</label>
+                    <InputText id="address" @bind-Value="Location.Address" class="form-control" />
+                    <ValidationMessage For="() => Location.Address" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="capacity" class="form-label">capacity:</label>
+                    <InputNumber id="capacity" @bind-Value="Location.capacity" class="form-control" />
+                    <ValidationMessage For="() => Location.capacity" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Location.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Location.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Location.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Location.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Location.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Location.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Location.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Location.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/locations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Location? Location { get; set; }
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Get the userId claim
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+        Location ??= await context.Location.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Location is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateLocation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Location!).State = EntityState.Modified;
+
+        //Set the userId to the UpdatedBy fields.
+        Location.UpdatedBy = userId;
+        //Set the DateUpdated fields to the current date and time.
+        Location.DateUpdated = DateTime.Now;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!LocationExists(Location!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/locations");
+    }
+
+    private bool LocationExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Location.Any(e => e.Id == id);
+    }
+}

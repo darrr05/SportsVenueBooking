@@ -1,8 +1,124 @@
 ﻿@page "/Bookings_Location"
-@attribute [StreamRendering]
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@rendermode InteractiveServer
 
 <PageTitle>Bookings_Location</PageTitle>
 
-<h3>Book Your Venue</h3>
+<head>
+    <link rel="stylesheet" href="styles/Booking_Location.css">
+</head>
 
-	
+<script src="site.js"></script>
+
+<div class="container">
+    <div class="header">
+        <img src="images/logo.jpg" alt="SportsSlot Logo" class="logo" />
+        <h1><em>SPORTSLOT</em></h1>
+    </div>
+
+    <h3>Choose a Sports venue</h3>
+
+    <div class="location-grid">
+        @if (Locations.Any())
+        {
+            @foreach (var location in Locations)
+            {
+                <button class="location-button @(SelectedLocation == location ? "selected" : "")"
+                        @onclick="() => SelectLocation(location)">
+                    <span>@location.Name</span>
+                </button>
+            }
+        }
+        else
+        {
+            <p>No locations available.</p>
+        }
+    </div>
+
+    <div class="map-container">
+        <iframe id="googleMap" width="600" height="450" style="border:0;"
+                loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </div>
+
+    <div class="navigation">
+        <a href="/Bookings_Sport" class="back-to-sport">Back</a>
+        <button class="next-button" @onclick="NextPage" disabled="@(SelectedLocation == null)">Next</button>
+    </div>
+</div>
+
+@code {
+    private List<Location> Locations = new();
+    private Location SelectedLocation { get; set; }
+    private string SelectedSportName { get; set; }
+
+    [Inject] private SportsVenueBookingContext DbContext { get; set; }
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Retrieve selected sport name from session storage
+            SelectedSportName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedSport");
+            if (string.IsNullOrEmpty(SelectedSportName))
+            {
+                NavigationManager.NavigateTo("/Bookings_Sport");
+            }
+            else
+            {
+                // Fetch locations dynamically based on the selected sport
+                await LoadLocationsFromDatabaseAsync(SelectedSportName);
+                StateHasChanged(); // Trigger re-render
+            }
+        }
+    }
+
+    private async Task LoadLocationsFromDatabaseAsync(string sportName)
+    {
+        // Query the database for locations linked to the selected sport
+        Locations = await DbContext.SportLocation
+        .Where(sl => sl.Sport.Name == sportName) // Filter by sport name in SportLocation
+        .Select(sl => sl.Location) // Select the Location based on the sport
+        .ToListAsync();
+    }
+
+    private async Task SelectLocation(Location location)
+    {
+        if (SelectedLocation == location)
+        {
+            SelectedLocation = null; // Deselect
+        }
+        else
+        {
+            SelectedLocation = location; // Select
+            await UpdateMapAsync(location.Address); // Update map
+        }
+        // Save the selected location to sessionStorage, or clear it if deselected
+        if (SelectedLocation != null)
+        {
+            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedLocation", SelectedLocation.Name);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "SelectedLocation");
+        }
+    }
+
+    private async Task UpdateMapAsync(string address)
+    {
+        var mapUrl = $"https://www.google.com/maps/embed/v1/place?key=AIzaSyAzE1G-GphoHAkPete7e0snd8BaHLFw_2g&q={Uri.EscapeDataString(address)}";
+        await JSRuntime.InvokeVoidAsync("updateMapSrc", "googleMap", mapUrl);
+    }
+
+    private void NextPage()
+    {
+        if (SelectedLocation != null)
+        {
+            NavigationManager.NavigateTo("/Bookings_Timeslot");
+        }
+    }
+}

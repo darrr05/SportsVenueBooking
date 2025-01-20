@@ -1,0 +1,79 @@
+﻿@page "/locations/delete"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Location</h2>
+    <hr />
+    @if (location is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@location.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Address</dt>
+            <dd class="col-sm-10">@location.Address</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">capacity</dt>
+            <dd class="col-sm-10">@location.capacity</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@location.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@location.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@location.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@location.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="location" OnValidSubmit="DeleteLocation" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(location is null)">Delete</button> |
+            <a href="/locations">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Location? location;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        location = await context.Location.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (location is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteLocation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Location.Remove(location!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/locations");
+    }
+}

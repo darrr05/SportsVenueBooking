@@ -23,34 +23,24 @@ else
                 <ValidationSummary role="alert"/>
                 <input type="hidden" name="Bookings.Id" value="@Bookings.Id" />
                 <div class="mb-3">
-                    <label for="sportname" class="form-label">SportName:</label>
-                    <InputText id="sportname" @bind-Value="Bookings.SportName" class="form-control" />
-                    <ValidationMessage For="() => Bookings.SportName" class="text-danger" />
+                    <label for="dateout" class="form-label">DateOut:</label>
+                    <InputDate id="dateout" @bind-Value="Bookings.DateOut" class="form-control" />
+                    <ValidationMessage For="() => Bookings.DateOut" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="locationname" class="form-label">LocationName:</label>
-                    <InputText id="locationname" @bind-Value="Bookings.LocationName" class="form-control" />
-                    <ValidationMessage For="() => Bookings.LocationName" class="text-danger" />
+                    <label for="datein" class="form-label">DateIn:</label>
+                    <InputDate id="datein" @bind-Value="Bookings.DateIn" class="form-control" />
+                    <ValidationMessage For="() => Bookings.DateIn" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="timeslotdescription" class="form-label">TimeslotDescription:</label>
-                    <InputText id="timeslotdescription" @bind-Value="Bookings.TimeslotDescription" class="form-control" />
-                    <ValidationMessage For="() => Bookings.TimeslotDescription" class="text-danger" />
+                    <label for="scheduleid" class="form-label">ScheduleId:</label>
+                    <InputNumber id="scheduleid" @bind-Value="Bookings.ScheduleId" class="form-control" />
+                    <ValidationMessage For="() => Bookings.ScheduleId" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="sportid" class="form-label">SportId:</label>
-                    <InputNumber id="sportid" @bind-Value="Bookings.SportId" class="form-control" />
-                    <ValidationMessage For="() => Bookings.SportId" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="locationid" class="form-label">LocationId:</label>
-                    <InputNumber id="locationid" @bind-Value="Bookings.LocationId" class="form-control" />
-                    <ValidationMessage For="() => Bookings.LocationId" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="timeslotid" class="form-label">TimeslotId:</label>
-                    <InputNumber id="timeslotid" @bind-Value="Bookings.TimeslotId" class="form-control" />
-                    <ValidationMessage For="() => Bookings.TimeslotId" class="text-danger" />
+                    <label for="customerid" class="form-label">CustomerId:</label>
+                    <InputNumber id="customerid" @bind-Value="Bookings.CustomerId" class="form-control" />
+                    <ValidationMessage For="() => Bookings.CustomerId" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="datecreated" class="form-label">DateCreated:</label>

@@ -1,0 +1,173 @@
+﻿@page "/schedules/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Schedule</h2>
+<hr />
+@if (Schedule is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Schedule" OnValidSubmit="UpdateSchedule" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Schedule.Id" value="@Schedule.Id" />
+                <div class="mb-3">
+                    <label for="sportlocationid" class="form-label">SportLocationId:</label>
+                    <InputSelect id="sportlocationid" @bind-Value="Schedule.SportLocationId" class="form-control">
+                        <option value="">-- Select SportLocation--</option>
+                        @if (SportLocation != null)
+                        {
+                            foreach (var sportlocation in SportLocation)
+                            {
+                                <option value="@sportlocation.Id">@sportlocation.Id</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Schedule.SportLocationId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="timeslotid" class="form-label">TimeslotId:</label>
+                    <InputSelect id="timeslotid" @bind-Value="Schedule.TimeslotId" class="form-control">
+                        <option value="">-- Select Timeslot --</option>
+                        @if (Timeslot != null)
+                        {
+                            foreach (var timeslot in Timeslot)
+                            {
+                                <option value="@timeslot.Id">@timeslot.Description</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Schedule.TimeslotId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="availableslots" class="form-label">AvailableSlots:</label>
+                    <InputNumber id="availableslots" @bind-Value="Schedule.AvailableSlots" class="form-control" />
+                    <ValidationMessage For="() => Schedule.AvailableSlots" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="scheduleddate" class="form-label">ScheduledDate:</label>
+                    <InputDate id="scheduleddate" @bind-Value="Schedule.ScheduledDate" class="form-control" />
+                    <ValidationMessage For="() => Schedule.ScheduledDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price:</label>
+                    <InputNumber id="price" @bind-Value="Schedule.Price" class="form-control" />
+                    <ValidationMessage For="() => Schedule.Price" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Schedule.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Schedule.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Schedule.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Schedule.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Schedule.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Schedule.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Schedule.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Schedule.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/schedules">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    private IList<SportLocation> SportLocation;
+    private IList<Timeslot> Timeslot;
+
+    [SupplyParameterFromForm]
+    private Schedule? Schedule { get; set; }
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Get the userId claim
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+        SportLocation = await context.SportLocation.ToListAsync();
+        Timeslot = await context.Timeslot.ToListAsync();
+
+        Schedule ??= await context.Schedules.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Schedule is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSchedule()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the UpdatedBy fields.
+        Schedule.UpdatedBy = userId;
+        //Set the DateUpdated fields to the current date and time.
+        Schedule.DateUpdated = DateTime.Now;
+
+        context.Attach(Schedule!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ScheduleExists(Schedule!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/schedules");
+    }
+
+    private bool ScheduleExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Schedules.Any(e => e.Id == id);
+    }
+}

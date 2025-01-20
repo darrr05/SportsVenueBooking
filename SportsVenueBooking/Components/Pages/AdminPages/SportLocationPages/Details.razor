@@ -1,0 +1,56 @@
+﻿@page "/sportlocations/details"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>SportLocation</h2>
+    <hr />
+    @if (sportlocation is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SportId</dt>
+            <dd class="col-sm-10">@sportlocation.SportId</dd>
+            <dt class="col-sm-2">LocationId</dt>
+            <dd class="col-sm-10">@sportlocation.LocationId</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@sportlocation.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@sportlocation.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@sportlocation.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@sportlocation.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/sportlocations/edit?id={sportlocation.Id}")">Edit</a> |
+            <a href="@($"/sportlocations")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private SportLocation? sportlocation;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        sportlocation = await context.SportLocation.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (sportlocation is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

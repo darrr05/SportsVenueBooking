@@ -1,0 +1,122 @@
+﻿@page "/sportlocations/create"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>SportLocation</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="SportLocation" OnValidSubmit="AddSportLocation" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="sportid" class="form-label">SportId:</label> 
+                <InputSelect id="sportid" @bind-Value="SportLocation.SportId" class="form-control">
+                    <option value="">-- Select Sport --</option>
+                    @if (Sport != null)
+                    {
+                        foreach (var sport in Sport)
+                        {
+                            <option value="@sport.Id">@sport.Name</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => SportLocation.SportId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="locationid" class="form-label">LocationId:</label> 
+                <InputSelect id="locationid" @bind-Value="SportLocation.LocationId" class="form-control">
+                    <option value="">-- Select Location --</option>
+                    @if (Location != null)
+                    {
+                        foreach (var location in Location)
+                        {
+                            <option value="@location.Id">@location.Name</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => SportLocation.LocationId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3" hidden>
+                <label for="datecreated" class="form-label">DateCreated:</label> 
+                <InputDate id="datecreated" @bind-Value="SportLocation.DateCreated" class="form-control" /> 
+                <ValidationMessage For="() => SportLocation.DateCreated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3" hidden>
+                <label for="dateupdated" class="form-label">DateUpdated:</label> 
+                <InputDate id="dateupdated" @bind-Value="SportLocation.DateUpdated" class="form-control" /> 
+                <ValidationMessage For="() => SportLocation.DateUpdated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3" hidden>
+                <label for="createdby" class="form-label">CreatedBy:</label> 
+                <InputText id="createdby" @bind-Value="SportLocation.CreatedBy" class="form-control" /> 
+                <ValidationMessage For="() => SportLocation.CreatedBy" class="text-danger" /> 
+            </div>        
+            <div class="mb-3" hidden>
+                <label for="updatedby" class="form-label">UpdatedBy:</label> 
+                <InputText id="updatedby" @bind-Value="SportLocation.UpdatedBy" class="form-control" /> 
+                <ValidationMessage For="() => SportLocation.UpdatedBy" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/sportlocations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private SportLocation SportLocation { get; set; } = new();
+
+    private SportsVenueBookingContext context = default!;
+    private IList<Sport> Sport;
+    private IList<Location> Location;
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    //OnInitialized method to get all Makes, Models and Colours
+    protected override async void OnInitialized()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Get the userId claim
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+
+        context = DbFactory.CreateDbContext();
+        Sport = context.Sport.ToList();
+        Location = context.Location.ToList();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSportLocation()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the CreatedBy and UpdatedBy fields.
+        SportLocation.CreatedBy = userId;
+        SportLocation.UpdatedBy = userId;
+        //Set the DateCreated and DateUpdated fields to the current date and time.
+        SportLocation.DateCreated = DateTime.Now;
+        SportLocation.DateUpdated = DateTime.Now;
+
+        context.SportLocation.Add(SportLocation);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/sportlocations");
+    }
+}

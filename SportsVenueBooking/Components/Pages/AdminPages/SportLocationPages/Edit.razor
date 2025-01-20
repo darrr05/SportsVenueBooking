@@ -1,0 +1,158 @@
+﻿@page "/sportlocations/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>SportLocation</h2>
+<hr />
+@if (SportLocation is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="SportLocation" OnValidSubmit="UpdateSportLocation" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="SportLocation.Id" value="@SportLocation.Id" />
+                <div class="mb-3">
+                    <label for="sportid" class="form-label">SportId:</label>
+                    <InputSelect id="sportid" @bind-Value="SportLocation.SportId" class="form-control">
+                        <option value="">-- Select Sport --</option>
+                        @if (Sport != null)
+                        {
+                            foreach (var sport in Sport)
+                            {
+                                <option value="@sport.Id">@sport.Name</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => SportLocation.SportId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="locationid" class="form-label">LocationId:</label>
+                    <InputSelect id="locationid" @bind-Value="SportLocation.LocationId" class="form-control">
+                        <option value="">-- Select Location --</option>
+                        @if (Location != null)
+                        {
+                            foreach (var location in Location)
+                            {
+                                <option value="@location.Id">@location.Name</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => SportLocation.LocationId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="SportLocation.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => SportLocation.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="SportLocation.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => SportLocation.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="SportLocation.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => SportLocation.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="SportLocation.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => SportLocation.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/sportlocations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private SportLocation? SportLocation { get; set; }
+
+    private IList<Sport> Sport;
+    private IList<Location> Location;
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Get the userId claim
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+        Sport = await context.Sport.ToListAsync();
+        Location = await context.Location.ToListAsync();
+
+        SportLocation ??= await context.SportLocation.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (SportLocation is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSportLocation()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the UpdatedBy fields.
+        SportLocation.UpdatedBy = userId;
+        //Set the DateUpdated fields to the current date and time.
+        SportLocation.DateUpdated = DateTime.Now;
+
+        context.Attach(SportLocation!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SportLocationExists(SportLocation!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/sportlocations");
+    }
+
+    private bool SportLocationExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.SportLocation.Any(e => e.Id == id);
+    }
+}

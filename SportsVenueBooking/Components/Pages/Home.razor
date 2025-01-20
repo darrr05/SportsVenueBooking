@@ -10,13 +10,13 @@
     <nav>
         <ul>
             <li>
-                <NavLink href="/Promotions" @onclick='() => Navigate("/Promotions")'>Promotions</NavLink>
+                <NavLink href="/Promotions">Promotions</NavLink>
             </li>
             <li>
-                <NavLink href="/Bookings_Sport" @onclick='() => Navigate("/Bookings_Sport")'>Bookings</NavLink>
+                <NavLink href="/Bookings_Sport">Bookings</NavLink>
             </li>
             <li>
-                <NavLink href="/About Us" @onclick='() => Navigate("/About Us")'>About Us</NavLink>
+                <NavLink href="/About Us">About Us</NavLink>
             </li>
         </ul>
     </nav>
@@ -26,7 +26,7 @@
     <div class="banner-text">
         <h1>Train Hard<br />Play Hard</h1>
         <p>Details Of Different Plans (Monthly, Yearly, Family, etc...)</p>
-        <NavLink href="/Bookings_Sport" button class="btn" @onclick='() => Navigate("/Bookings_Sport")'>Book Now</NavLink>
+        <NavLink href="/Bookings_Sport" class="btn">Book Now</NavLink>
     </div>
 </div>
 
@@ -47,33 +47,7 @@
 </footer>
 
 <AuthorizeView>
-
     <NotAuthorized>
         <NavLink href="/Account/Login" class="bottom-login">Login</NavLink>
     </NotAuthorized>
 </AuthorizeView>
-
-@code {
-    private async Task Navigate(string targetUrl, bool requiresAuth = false)
-    {
-        if (requiresAuth)
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (user.Identity?.IsAuthenticated == true)
-            {
-                NavigationManager.NavigateTo(targetUrl);
-            }
-            else
-            {
-                NavigationManager.NavigateTo("/Account/Login");
-            }
-        }
-        else
-        {
-            NavigationManager.NavigateTo(targetUrl);
-        }
-    }
-
-}

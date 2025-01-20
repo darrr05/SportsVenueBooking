@@ -1,31 +1,37 @@
-﻿using SportsVenueBooking.Components;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using SportsVenueBooking.Data;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SportsVenueBooking.Components;
+using SportsVenueBooking.Data;
 using SportsVenueBooking.Components.Account;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity.UI;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure the database context
 builder.Services.AddDbContextFactory<SportsVenueBookingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SportsVenueBookingContext") ?? throw new InvalidOperationException("Connection string 'SportsVenueBookingContext' not found.")));
 
+// Add QuickGrid support
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-// Add services to the container.
+// Add services for Razor Components with interactive server render mode
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add cascading authentication state to the container
 builder.Services.AddCascadingAuthenticationState();
 
+// Configure Identity for authentication
 builder.Services.AddScoped<IdentityUserAccessor>();
-
 builder.Services.AddScoped<IdentityRedirectManager>();
 
+// Configure authentication state provider for Blazor Server
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+// Configure Identity authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -33,33 +39,50 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
+// Configure Identity with the SportsVenueBookingUser model
 builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	.AddRoles<IdentityRole>()
-	.AddEntityFrameworkStores<SportsVenueBookingContext>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<SportsVenueBookingContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+// Add email sender (replace with real email sender in production)
 builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, IdentityNoOpEmailSender>();
+
+// Configure the cookie settings for identity
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);  // Ensure longer expiration for RememberMe
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+	});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
     app.UseMigrationsEndPoint();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// Map Razor components for interactive rendering
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapAdditionalIdentityEndpoints();;
+// Map identity endpoints
+app.MapAdditionalIdentityEndpoints();
 
 app.Run();

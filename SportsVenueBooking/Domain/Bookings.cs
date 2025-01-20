@@ -1,19 +1,46 @@
 ﻿
+using SportsVenueBooking.Data;
+
 namespace SportsVenueBooking.Domain
 {
 	public class Bookings : BaseDomainModel
 	{
-		public string? SportName { get; set; } // Optional display property
-		public string? LocationName { get; set; } // Optional display property
-		public string? TimeslotDescription { get; set; } // Optional display property
+		public DateTime DateOut { get; set; }
+		public DateTime DateIn { get; set; }
 
-		public int SportId { get; set; } // FK for Sports table
-		public int LocationId { get; set; } // FK for Locations table
-		public int TimeslotId { get; set; } // FK for Timeslots table
+		public int ScheduleId { get; set; } // FK for Schedule table
+		public int CustomerId { get; set; } // FK for Customer table
 
-		// Navigation properties (optional for Entity Framework relationships)
+		// New properties for booking management
+		// Existing properties
+		public string? SportName { get; set; }
+		public string? LocationName { get; set; }
+		public string? TimeslotDescription { get; set; }
+		public int SportId { get; set; }
+		public int LocationId { get; set; }
+		public int TimeslotId { get; set; }
+		public DateTime BookingDate { get; set; }
+		public decimal TotalAmount { get; set; }
+		public string BookingStatus { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
+		public string? CancellationReason { get; set; }
+		public DateTime? CancellationDate { get; set; }
+
+		// Payment tracking
+		public bool IsPaid { get; set; } = false;
+		public string? StripePaymentIntentId { get; set; }
+		public DateTime? PaymentDate { get; set; }
+
+		// Navigation properties
 		public Sport? Sport { get; set; }
 		public Location? Location { get; set; }
 		public Timeslot? Timeslot { get; set; }
+		public SportsVenueBookingUser? User { get; set; }
+		public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+		// Validation method
+		public bool IsValidBooking()
+		{
+			return BookingDate.Date >= DateTime.Now.Date;
+		}
 	}
 }

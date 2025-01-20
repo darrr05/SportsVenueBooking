@@ -1,0 +1,111 @@
+﻿body {
+    font-family: Arial, sans-serif;
+    background-color: #001F3F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+}
+
+.header {
+    margin-bottom: 30px;
+    background-color: white;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+}
+
+.checkout-summary {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+    .checkout-summary h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+    }
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+    .summary-item span {
+        font-size: 16px;
+        color: #ccc;
+    }
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+    .navigation .back-button,
+    .navigation .confirm-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .navigation .back-button {
+        background-color: #f0f0f0;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+
+    .navigation .confirm-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+        .navigation .confirm-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .navigation .back-button:hover,
+        .navigation .confirm-button:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .navigation .back-button:active,
+        .navigation .confirm-button:active {
+            background-color: #3e8e41;
+        }
+
+.checkout-summary {
+    background-color: #003366;
+    border: 1px solid #003366;
+    color: #fff;
+}
+
+    .checkout-summary h3 {
+        color: #fff;
+    }
+
+.summary-item span {
+    color: #ddd;
+}

@@ -1,0 +1,71 @@
+﻿@page "/timeslots/delete"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Timeslot</h2>
+    <hr />
+    @if (timeslot is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@timeslot.Description</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@timeslot.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@timeslot.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@timeslot.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@timeslot.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="timeslot" OnValidSubmit="DeleteTimeslot" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(timeslot is null)">Delete</button> |
+            <a href="/timeslots">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Timeslot? timeslot;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        timeslot = await context.Timeslot.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (timeslot is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteTimeslot()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Timeslot.Remove(timeslot!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/timeslots");
+    }
+}

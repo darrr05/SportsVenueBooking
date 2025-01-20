@@ -6,8 +6,7 @@ namespace SportsVenueBooking.Domain
 	{
 		public string Name { get; set; }
 		public string Address { get; set; }
-		public string capacity { get; set; }
-		public ICollection<Bookings>? Bookings { get; set; } // Navigation property
+		public int capacity { get; set; }
 
 	}
 }

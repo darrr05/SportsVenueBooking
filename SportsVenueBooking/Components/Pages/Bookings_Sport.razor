@@ -1,6 +1,124 @@
-﻿@page "/Bookings_Sport"
+﻿@using SportsVenueBooking.Domain
+@page "/Bookings_Sport"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
 @rendermode InteractiveServer
+
+@inject SportsVenueBookingContext DbContext
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Booking_Sport</PageTitle>
 
-<h1>Choose A Sport</h1>
+<head>
+    <link rel="stylesheet" href="styles/Booking_Sport.css">
+</head>
+
+<div class="container">
+    <div class="header">
+        <img src="images/logo.jpg" alt="SportsSlot Logo" class="logo" />
+        <h1>SPORTSLOT</h1>
+    </div>
+
+    <!-- Choose a Sport Heading -->
+    <h3>Choose a Sport</h3> <!-- Added this heading -->
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" placeholder="Search for sports..." @bind="SearchQuery" @oninput="FilterSports" class="search-input" />
+    </div>
+
+    <div class="sports-grid">
+        @if (FilteredSports.Any())
+        {
+            @foreach (var sport in FilteredSports)
+            {
+                <button class="sport-button @(SelectedSport == sport ? "selected" : "")"
+                        @onclick="() => SelectSport(sport)">
+                    <img src="@sport.ImagePath" alt="@sport.Name" class="sport-image" />
+                    <span>@sport.Name</span>
+                </button>
+            }
+        }
+        else
+        {
+            <p>No sports available.</p>
+        }
+    </div>
+
+    <div class="navigation">
+        <a href="/" class="back-to-home">Back To Home</a>
+        <button class="next-button" @onclick="NextPage" disabled="@(SelectedSport == null)">Next</button>
+    </div>
+    <AuthorizeView>
+        <NotAuthorized>
+            <NavLink href="/Account/Login" class="bottom-login">Login</NavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private List<Sport> Sports = new();
+    private Sport SelectedSport { get; set; }
+    private string SearchQuery { get; set; } = string.Empty;
+
+    // Filtered list based on search query
+    private IEnumerable<Sport> FilteredSports => string.IsNullOrEmpty(SearchQuery)
+        ? Sports
+        : Sports.Where(sport => sport.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sports = await DbContext.Sport.ToListAsync();
+    }
+
+    private async Task SelectSport(Sport sport)
+    {
+        if (SelectedSport == sport)
+        {
+            // If the same sport is selected again, deselect it
+            SelectedSport = null;
+        }
+        else
+        {
+            // Otherwise, select the clicked sport
+            SelectedSport = sport;
+        }
+
+        // Save the selected sport to sessionStorage, or clear it if deselected
+        if (SelectedSport != null)
+        {
+            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedSport", SelectedSport.Name);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "SelectedSport");
+        }
+    }
+
+    private async Task NextPage()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (user?.Identity?.IsAuthenticated != true)
+        {
+            // Redirect to the login page if the user is not authenticated
+            NavigationManager.NavigateTo("/Account/Login");
+        }
+        else
+        {
+            if (SelectedSport != null)
+            {
+                // If the user is authenticated, proceed to the next page
+                NavigationManager.NavigateTo("/Bookings_Location");
+            }
+        }
+    }
+
+    // This method handles the filtering of sports as you type
+    private void FilterSports()
+    {
+        // The filtering happens automatically via the FilteredSports property
+    }
+}
