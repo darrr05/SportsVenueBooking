@@ -1,4 +1,6 @@
 ﻿
+using SportsVenueBooking.Data;
+
 namespace SportsVenueBooking.Domain
 {
 	public class Customer : BaseDomainModel

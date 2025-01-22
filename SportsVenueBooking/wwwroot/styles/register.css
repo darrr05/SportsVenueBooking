@@ -29,6 +29,20 @@
     max-width: 400px;
     width: 100%;
     text-align: center;
+    margin-bottom: 50px; /* Add more space between form and external auth section */
+}
+
+/* External Auth Section */
+.external-auth-section {
+    width: 100%;
+    text-align: center;
+    margin-top: 150px; /* Add spacing between the form and external auth section */
+    padding-top: 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure proper positioning */
+    z-index: 1; /* Keeps it above any background elements */
 }
 
 /* Styling for links */
@@ -47,7 +61,7 @@ button {
     margin-top: 20px;
 }
 
-.external-auth-section {
-    margin-top: 2rem; /* Add margin top for spacing */
-    text-align: center;
+/* Optional tweak for form inputs to avoid overlap */
+.form-floating {
+    margin-bottom: 1.5rem; /* Increase spacing between form fields */
 }

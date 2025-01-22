@@ -128,7 +128,6 @@
                 bookings = await DbContext.Bookings
                     .Include(b => b.Sport)
                     .Include(b => b.Location)
-                    .Include(b => b.Timeslot)
                     .Where(b => b.CustomerId == parsedCustomerId)
                     .ToListAsync();
             }

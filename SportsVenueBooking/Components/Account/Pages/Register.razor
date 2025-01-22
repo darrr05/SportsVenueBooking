@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
 
 @inject UserManager<SportsVenueBookingUser> UserManager
 @inject IUserStore<SportsVenueBookingUser> UserStore
@@ -15,6 +16,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject RoleManager<IdentityRole> RoleManager
+@inject IServiceProvider ServiceProvider
 
 <PageTitle>Register</PageTitle>
 
@@ -55,6 +57,27 @@
                 <label for="lastname">Last Name</label>
                 <ValidationMessage For="() => Input.LastName" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control"
+                           autocomplete="tel" aria-required="true" placeholder="12345678" />
+                <label for="phoneNumber">Phone Number</label>
+                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputNumber @bind-Value="Input.Age" class="form-control"
+                             aria-required="true" placeholder="25" />
+                <label for="age">Age</label>
+                <ValidationMessage For="() => Input.Age" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Address" class="form-control"
+                           aria-required="true" placeholder="123 Main Street" />
+                <label for="address">Address</label>
+                <ValidationMessage For="() => Input.Address" class="text-danger" />
+            </div>
+
 
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
@@ -114,18 +137,41 @@
             return;
         }
 
-        //create the user role if it doesn't exist
+        // Retrieve the current user's email for auditing purposes
+        var currentUserEmail = Input.Email;
+
+        // Create a new Customer entity with audit fields
+        var customer = new Customer
+            {
+                FirstName = Input.FirstName,
+                LastName = Input.LastName,
+                Email = Input.Email,
+                PhoneNumber = Input.PhoneNumber,
+                Age = Input.Age,
+                Address = Input.Address,
+                DateCreated = DateTime.Now,
+                DateUpdated = DateTime.Now,
+                CreatedBy = currentUserEmail,
+                UpdatedBy = currentUserEmail
+            };
+
+        // Save Customer to the database
+        using (var scope = ServiceProvider.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<SportsVenueBookingContext>();
+            dbContext.Customer.Add(customer);
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Assign user role and send confirmation email
         if (!await RoleManager.RoleExistsAsync("User"))
         {
             await RoleManager.CreateAsync(new IdentityRole("User"));
         }
-        //add the user to the user role
         await UserManager.AddToRoleAsync(user, "User");
-        //add the user id as claim when user registers
-        await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId",user.Id));
+        await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId", user.Id));
 
         Logger.LogInformation("User created a new account with password.");
-
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -182,6 +228,20 @@
         [Required]
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = "";
+
+        [Required]
+        [Phone]
+        [Display(Name = "Phone Number")]
+        public string PhoneNumber { get; set; } = "";
+
+        [Required]
+        [Range(1, 120, ErrorMessage = "Age must be between 1 and 120.")]
+        [Display(Name = "Age")]
+        public int Age { get; set; }
+
+        [Required]
+        [Display(Name = "Address")]
+        public string Address { get; set; } = "";
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]

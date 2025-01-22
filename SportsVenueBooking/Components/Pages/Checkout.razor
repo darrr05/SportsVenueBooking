@@ -26,13 +26,16 @@
             <span>@SelectedLocationName</span>
         </div>
         <div class="summary-item">
-            <span>Time:</span>
-            <span>@SelectedTimeslotDescription</span>
+            <span>Date:</span>
             <span>@SelectedDate.ToString("yyyy-MM-dd")</span>
         </div>
         <div class="summary-item">
-            <span>Price:</span>
-            <span>@TimeslotPrice.ToString("C2")</span> <!-- Display the price here -->
+            <span>Time Slots:</span>
+            <div class="summary-item">
+                <span>Time Slots:</span>
+                <span>@string.Join(", ", SelectedTimeslots.Split(','))</span>
+            </div>
+
         </div>
     </div>
 
@@ -49,14 +52,15 @@
 </div>
 
 @code {
-    private string SelectedSportName { get; set; }
-    private string SelectedLocationName { get; set; }
-    private string SelectedTimeslotDescription { get; set; }
+    private string SelectedSportName { get; set; } = string.Empty;
+    private string SelectedLocationName { get; set; } = string.Empty;
+    private string SelectedTimeslots { get; set; } = string.Empty;
     private DateTime SelectedDate { get; set; }
     private bool IsFirstRender { get; set; } = true;
-    private decimal TimeslotPrice { get; set; }
+    private List<Schedule> Schedules { get; set; } = new();
     private bool IsPaymentButtonEnabled { get; set; } = false;
-    private string CustomerId { get; set; } // Updated variable name
+    private string UserId { get; set; } = string.Empty;
+    private int SelectedSportLocationId { get; set; }
 
     [Inject] private IJSRuntime JSRuntime { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
@@ -65,11 +69,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Get the customer ID when the component initializes
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        CustomerId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        UserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
-        if (string.IsNullOrEmpty(CustomerId))
+        if (string.IsNullOrEmpty(UserId))
         {
             NavigationManager.NavigateTo("/login");
             return;
@@ -82,10 +85,10 @@
         {
             IsFirstRender = false;
 
-            // Retrieve stored session values
-            SelectedSportName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedSport");
-            SelectedLocationName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedLocation");
-            SelectedTimeslotDescription = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedTimeslot");
+            SelectedSportName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedSport") ?? string.Empty;
+            SelectedLocationName = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedLocation") ?? string.Empty;
+            SelectedTimeslots = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedTimeslot") ?? string.Empty;
+
 
             var selectedDateString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedDate");
             if (!string.IsNullOrEmpty(selectedDateString))
@@ -93,15 +96,23 @@
                 SelectedDate = DateTime.Parse(selectedDateString);
             }
 
-            var priceString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "TimeslotPrice");
-            if (decimal.TryParse(priceString, out var price))
+            var sportLocationIdString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedSportLocationId");
+            if (!string.IsNullOrEmpty(sportLocationIdString))
             {
-                TimeslotPrice = price;
+                SelectedSportLocationId = int.Parse(sportLocationIdString);
             }
 
-            if (string.IsNullOrEmpty(SelectedSportName) ||
-                string.IsNullOrEmpty(SelectedLocationName) ||
-                string.IsNullOrEmpty(SelectedTimeslotDescription))
+            Schedules = await DbContext.Schedules
+                .Include(s => s.SportLocationTimeslot.Timeslot)
+                .Where(s => s.SportLocationTimeslot.SportLocationId == SelectedSportLocationId && s.ScheduledDate == SelectedDate)
+                .ToListAsync();
+
+            if (Schedules == null || !Schedules.Any())
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "No schedules found.");
+            }
+
+            if (string.IsNullOrEmpty(SelectedSportName) || string.IsNullOrEmpty(SelectedLocationName))
             {
                 NavigationManager.NavigateTo("/Bookings_Sport");
                 return;
@@ -121,33 +132,27 @@
     {
         try
         {
-            if (string.IsNullOrEmpty(CustomerId))
+            if (string.IsNullOrEmpty(UserId))
             {
                 await JSRuntime.InvokeVoidAsync("alert", "Please log in to complete your booking.");
                 NavigationManager.NavigateTo("/login");
                 return;
             }
 
-            // Create the booking with the actual customer ID
             var booking = new Bookings
                 {
-                    CustomerId = int.Parse(CustomerId), // Ensure this matches your type
+                    CustomerId = int.Parse(UserId),
                     SportName = SelectedSportName,
                     LocationName = SelectedLocationName,
-                    TimeslotDescription = SelectedTimeslotDescription,
                     BookingDate = SelectedDate,
-                    TotalAmount = TimeslotPrice,
+                    TotalAmount = Schedules.Sum(s => (double)s.SportLocationTimeslot.Price),
                     BookingStatus = "Paid"
                 };
 
-            // Save the booking
             await DbContext.Bookings.AddAsync(booking);
             await DbContext.SaveChangesAsync();
 
-            // Clear the session storage
             await JSRuntime.InvokeVoidAsync("sessionStorage.clear");
-
-            // Show success message and redirect
             await JSRuntime.InvokeVoidAsync("alert", "Payment successful! Redirecting to dashboard...");
             NavigationManager.NavigateTo("/dashboard");
         }

@@ -1,0 +1,79 @@
+﻿@page "/sportlocationtimeslots/delete"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>SportLocationTimeslot</h2>
+    <hr />
+    @if (sportlocationtimeslot is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SportLocationId</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.SportLocationId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">TimeslotId</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.TimeslotId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.Price</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@sportlocationtimeslot.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="sportlocationtimeslot" OnValidSubmit="DeleteSportLocationTimeslot" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(sportlocationtimeslot is null)">Delete</button> |
+            <a href="/sportlocationtimeslots">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private SportLocationTimeslot? sportlocationtimeslot;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        sportlocationtimeslot = await context.SportLocationTimeslots.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (sportlocationtimeslot is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteSportLocationTimeslot()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.SportLocationTimeslots.Remove(sportlocationtimeslot!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/sportlocationtimeslots");
+    }
+}

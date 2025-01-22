@@ -47,7 +47,7 @@ builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.Sign
     .AddDefaultTokenProviders();
 
 // Add email sender (replace with real email sender in production)
-builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, IEmailSender>();
 
 // Configure the cookie settings for identity
 builder.Services.ConfigureApplicationCookie(options =>

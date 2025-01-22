@@ -4,15 +4,12 @@ namespace SportsVenueBooking.Domain
 {
 	public class Schedule : BaseDomainModel
 	{
-		// Foreign keys for composite key in SportLocation (SportId and LocationId)
-		public int SportLocationId { get; set; }  // Foreign key to SportLocation
+		public int SportLocationTimeslotId { get; set; }  // Foreign key to SportLocationTimeslot
 
-		public SportLocation? SportLocation { get; set; }  // Navigation property to SportLocation
-
-		public int TimeslotId { get; set; }  // Foreign key to Timeslot
-		public Timeslot Timeslots { get; set; }  // Navigation property to Timeslot
+		public SportLocationTimeslot? SportLocationTimeslot { get; set; }  // Navigation property to SportLocation
 
 		public int AvailableSlots { get; set; }
+		public double totalPrice { get; set; }
 
 		private DateTime _scheduledDate;
 
@@ -21,6 +18,5 @@ namespace SportsVenueBooking.Domain
 			get => _scheduledDate.Date;  // Always return just the date part
 			set => _scheduledDate = value.Date;  // Store only the date part
 		}
-		public float Price { get; set; }
 	}
 }

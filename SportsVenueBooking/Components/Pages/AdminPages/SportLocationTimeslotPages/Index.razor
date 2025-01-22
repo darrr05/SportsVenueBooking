@@ -1,0 +1,42 @@
+﻿@page "/sportlocationtimeslots"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SportsVenueBooking.Domain
+@using SportsVenueBooking.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="sportlocationtimeslots/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.SportLocationTimeslots">
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.SportLocationId" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.TimeslotId" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.Price" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.DateCreated" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.DateUpdated" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.CreatedBy" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.UpdatedBy" />
+
+    <TemplateColumn Context="sportlocationtimeslot">
+        <a href="@($"sportlocationtimeslots/edit?id={sportlocationtimeslot.Id}")">Edit</a> |
+        <a href="@($"sportlocationtimeslots/details?id={sportlocationtimeslot.Id}")">Details</a> |
+        <a href="@($"sportlocationtimeslots/delete?id={sportlocationtimeslot.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SportsVenueBookingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
