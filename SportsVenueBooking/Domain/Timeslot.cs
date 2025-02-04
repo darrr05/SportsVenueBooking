@@ -1,5 +1,4 @@
 ﻿
-
 namespace SportsVenueBooking.Domain
 {
 	public class Timeslot : BaseDomainModel

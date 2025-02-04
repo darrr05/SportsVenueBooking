@@ -1,7 +1,164 @@
 ﻿@page "/About Us"
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
 
 <h3>About Us</h3>
 
-@code {
+<head>
+    <link rel="stylesheet" href="styles/AboutUs.css">
+</head>
 
+<div class="about-container">
+    <h1>Bringing Sports and Community Together.</h1>
+
+    <div class="mission">
+        <p>Mission: Our mission is to make sports facilities accessible, connecting people with opportunities to stay active and healthy.</p>
+    </div>
+
+    <div class="company-info">
+        <img src="images/logo.jpg" alt="SportSlot Logo" class="logo" />
+        <p>SportSlot Pte Ltd was founded with the goal of simplifying the process of booking sports venues. Our platform bridges the gap between facility providers and users, offering a seamless experience for individuals, teams, and organizations.</p>
+    </div>
+
+    <div class="core-values">
+        <h2>Core Values:</h2>
+        <ul>
+            <li>We believe sports should be for everyone.</li>
+            <li>Fostering connections through shared sports experiences.</li>
+            <li>Ensuring every booking is smooth and stress-free.</li>
+            <li>Leveraging technology to meet the needs of today's users.</li>
+        </ul>
+    </div>
+
+    <div class="explore-venues">
+        <p>Explore venues near you now and book your next game in just a few clicks!</p>
+    </div>
+
+    <div class="contact-us">
+        <h2>Contact Us</h2>
+        <p>If you have any questions or would like to get in touch with us, please reach out using the following methods:</p>
+        <ul>
+            <li>Email: <a href="mailto:sportslotfsgrp7@gmail.com">sportslotfsgrp7@gmail.com</a></li>
+            <li>Phone: +65 83872116</li>
+            <li>Address: 123 Sport Avenue, Singapore 123456</li>
+        </ul>
+    </div>
+
+    <!-- Feedback Section -->
+    <div class="feedback-section">
+        <h3>Contact Us</h3>
+        <form @onsubmit="HandleFeedbackSubmission">
+            <div class="form-group">
+                <label for="email">Your Email</label>
+                <input id="email" type="email" @bind="Contactus.CustomerEmail" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input id="subject" type="text" @bind="Contactus.Subject" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" @bind="Contactus.Message" class="form-control" required></textarea>
+            </div>
+            <!-- Submit Feedback Button -->
+            <div class="confirm-section">
+                <button class="confirm-button" type="submit" id="confirm-button" disabled="@(!IsFormValid())">Submit Feedback</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="back-home">
+        <a href="/">Back To Home</a>
+    </div>
+</div>
+
+@code {
+    // Model to hold the feedback data
+    private ContactUs Contactus = new ContactUs();
+
+    [Inject] private SportsVenueBookingContext _context { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    @inject IJSRuntime JSRuntime
+
+    private string CreatedBy;
+    private string UpdatedBy;
+
+    // Get user details from AuthenticationState
+    private async Task SetUserDetails()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            if (user.IsInRole("Admin"))
+            {
+                CreatedBy = "System";
+                UpdatedBy = "System";
+            }
+            else
+            {
+                var firstName = user.Identity.Name?.Split(' ')[0] ?? "Anonymous";
+                var lastName = user.Identity.Name?.Split(' ').Length > 1 ? user.Identity.Name?.Split(' ')[1] : string.Empty;
+                CreatedBy = $"{firstName} {lastName}".Trim() ?? "Anonymous";
+                UpdatedBy = $"{firstName} {lastName}".Trim() ?? "Anonymous";
+            }
+        }
+        else
+        {
+            CreatedBy = "Anonymous";
+            UpdatedBy = "Anonymous";
+        }
+    }
+
+    // Check if the form is valid (i.e., if all fields are filled)
+    private bool IsFormValid()
+    {
+        return !string.IsNullOrEmpty(Contactus.CustomerEmail) &&
+               !string.IsNullOrEmpty(Contactus.Subject) &&
+               !string.IsNullOrEmpty(Contactus.Message);
+    }
+
+    // Feedback submission handler
+    private async Task HandleFeedbackSubmission()
+    {
+        try
+        {
+            if (!IsFormValid())
+            {
+                // Log error or show a user-friendly message
+                await JSRuntime.InvokeVoidAsync("alert", "Please fill in all the fields.");
+            }
+            else
+            {
+                // Set the user details for CreatedBy and UpdatedBy
+                await SetUserDetails();
+
+                // Create a new ContactUs entity and populate it with the form data
+                var contactUs = new ContactUs
+                    {
+                        CustomerEmail = Contactus.CustomerEmail,
+                        Subject = Contactus.Subject,
+                        Message = Contactus.Message,
+                        SubmittedAt = DateTime.Now,
+                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
+                        CreatedBy = CreatedBy,
+                        UpdatedBy = UpdatedBy
+                    };
+
+                // Save the feedback to the database
+                _context.ContactUs.Add(contactUs);
+                await _context.SaveChangesAsync();
+                NavigationManager.NavigateTo("/thank-you"); // Redirect to a "Thank You" page
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log exception or show error
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+    }
 }

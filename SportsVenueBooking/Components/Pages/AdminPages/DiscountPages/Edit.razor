@@ -1,0 +1,139 @@
+﻿@page "/discounts/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Discount</h2>
+<hr />
+@if (Discount is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Discount" OnValidSubmit="UpdateDiscount" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Discount.Id" value="@Discount.Id" />
+                <div class="mb-3">
+                    <label for="code" class="form-label">Code:</label>
+                    <InputText id="code" @bind-Value="Discount.Code" class="form-control" />
+                    <ValidationMessage For="() => Discount.Code" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount:</label>
+                    <InputNumber id="amount" @bind-Value="Discount.Amount" class="form-control" />
+                    <ValidationMessage For="() => Discount.Amount" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="percentage" class="form-label">Percentage:</label>
+                    <InputNumber id="percentage" @bind-Value="Discount.Percentage" class="form-control" />
+                    <ValidationMessage For="() => Discount.Percentage" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="maxuses" class="form-label">MaxUses:</label>
+                    <InputNumber id="maxuses" @bind-Value="Discount.MaxUses" class="form-control" />
+                    <ValidationMessage For="() => Discount.MaxUses" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="usagecount" class="form-label">UsageCount:</label>
+                    <InputNumber id="usagecount" @bind-Value="Discount.UsageCount" class="form-control" />
+                    <ValidationMessage For="() => Discount.UsageCount" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="iselderlydiscount" class="form-label">IsElderlyDiscount:</label>
+                    <InputCheckbox id="iselderlydiscount" @bind-Value="Discount.IsElderlyDiscount" class="form-check-input" />
+                    <ValidationMessage For="() => Discount.IsElderlyDiscount" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="expirationdate" class="form-label">ExpirationDate:</label>
+                    <InputDate id="expirationdate" @bind-Value="Discount.ExpirationDate" class="form-control" />
+                    <ValidationMessage For="() => Discount.ExpirationDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Discount.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Discount.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Discount.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Discount.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Discount.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Discount.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Discount.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Discount.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/discounts">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Discount? Discount { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Discount ??= await context.Discounts.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Discount is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateDiscount()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Discount!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!DiscountExists(Discount!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/discounts");
+    }
+
+    private bool DiscountExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Discounts.Any(e => e.Id == id);
+    }
+}

@@ -1,0 +1,43 @@
+﻿@page "/paymentsuccess"
+@using Microsoft.AspNetCore.Components
+@using System.Web
+
+<h3>Payment Success</h3>
+
+@if (BookingId > 0)
+{
+    <p>Payment for booking ID @BookingId was successful!</p>
+}
+else
+{
+    <p>Invalid booking ID or payment was unsuccessful.</p>
+}
+
+<a class="btn btn-primary" href="/">Go to Home</a>
+<a class="btn btn-secondary" href="/dashboard">Go to Dashboard</a>
+
+@code {
+    private int BookingId { get; set; }
+
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get the query parameter from the URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryParams = HttpUtility.ParseQueryString(uri.Query);
+
+        // Safely retrieve the bookingId query parameter
+        var bookingIdParam = queryParams["bookingId"];
+
+        // Check if the parameter is not null or empty
+        if (string.IsNullOrEmpty(bookingIdParam) || !int.TryParse(bookingIdParam, out int bookingId))
+        {
+            BookingId = 0;  // Set to 0 if parsing fails or the parameter is missing
+        }
+        else
+        {
+            BookingId = bookingId;  // Otherwise, set the BookingId
+        }
+    }
+}

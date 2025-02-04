@@ -1,0 +1,274 @@
+﻿@page "/pay"
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using System.Text.Json
+@rendermode InteractiveServer
+
+<head>
+    <link rel="stylesheet" href="styles/Pay.css">
+</head>
+
+<div class="container">
+    <div class="header">
+        <img src="images/logo.jpg" alt="SportsSlot Logo" class="logo" />
+        <h1>SPORTSLOT</h1>
+    </div>
+
+    <div class="row">
+        <!-- Left Section: Payment Method and Discount -->
+        <div class="col-md-6 payment-method-selection">
+            <!-- Discount Code Section -->
+            <div class="discount-section">
+                <h3>Apply Discount Code</h3>
+                <input type="text" @bind="DiscountCode" class="form-control" placeholder="Enter discount code" />
+                <button @onclick="ApplyDiscount" class="btn btn-primary">Apply Discount</button>
+                @if (!string.IsNullOrEmpty(DiscountMessage))
+                {
+                    <p>@DiscountMessage</p>
+                }
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="payment-method-selection">
+                <h3>Select Payment Method</h3>
+                <select @bind="SelectedPaymentMethod">
+                    <option value="CreditCard">Credit Card</option>
+                    <option value="PayPal">PayPal</option>
+                </select>
+            </div>
+
+            <!-- Credit Card Input Section -->
+            @if (SelectedPaymentMethod == "CreditCard")
+            {
+                <div class="credit-card-details">
+                    <h3>Enter Credit Card Information</h3>
+                    <div class="form-group">
+                        <label for="card-name">Name on Card</label>
+                        <input id="card-name" type="text" @bind="CardName" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="card-number">Card Number</label>
+                        <input id="card-number" type="text" @bind="CardNumber" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="expiry-date">Expiry Date</label>
+                        <input id="expiry-date" type="text" @bind="ExpiryDate" class="form-control" required placeholder="--/--" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input id="cvv" type="text" @bind="CVV" class="form-control" required />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right Section: Booking Summary -->
+        <div class="col-md-6 checkout-summary">
+            <h3>Booking Summary</h3>
+            @if (BookingDetails != null)
+            {
+                <div class="summary-item">
+                    <span>Sport:</span>
+                    <span>@BookingDetails.SportLocation?.Sport?.Name</span>
+                </div>
+                <div class="summary-item">
+                    <span>Location:</span>
+                    <span>@BookingDetails.SportLocation?.Location?.Name</span>
+                </div>
+                <div class="summary-item">
+                    <span>Date:</span>
+                    <span>@BookingDetails.BookingDate.ToString("yyyy-MM-dd")</span>
+                </div>
+                <div class="summary-item">
+                    <span>Time Slot:</span>
+                    @if (BookingDetails.SportLocationTimeslot != null)
+                    {
+                        <ul>
+                            <li>@BookingDetails.SportLocationTimeslot.Timeslot?.Description</li>
+                        </ul>
+                    }
+                </div>
+                <div class="summary-item">
+                    <span>Total Price:</span>
+                    <span>$@BookingDetails.TotalAmount</span>
+                </div>
+            }
+            else
+            {
+                <p>Loading booking details...</p>
+            }
+        </div>
+    </div>
+
+    <!-- Confirm Payment Button -->
+    <div class="confirm-section">
+        <button class="confirm-button" @onclick="ProcessPayment" id="confirm-button" disabled="@(!IsConfirmButtonEnabled)">Confirm Payment</button>
+        <div id="payment-message" class="payment-message">@PaymentMessage</div>
+    </div>
+</div>
+
+@code {
+    private string SelectedPaymentMethod { get; set; } = "CreditCard";
+    private string CardName { get; set; }
+    private string CardNumber { get; set; }
+    private string ExpiryDate { get; set; }
+    private string CVV { get; set; }
+    private string DiscountCode { get; set; }
+    private string PaymentMessage { get; set; }
+    private string DiscountMessage { get; set; }
+
+    private int BookingId { get; set; }
+    private Bookings BookingDetails { get; set; }
+
+    private bool IsConfirmButtonEnabled =>
+        !string.IsNullOrEmpty(SelectedPaymentMethod) && IsValidCardDetails();
+
+    [Inject] private SportsVenueBookingContext _context { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var bookingIdString = queryParams["bookingId"];
+
+        if (int.TryParse(bookingIdString, out var bookingId))
+        {
+            BookingId = bookingId;
+            BookingDetails = await _context.Bookings
+                .Include(b => b.SportLocationTimeslot)
+                    .ThenInclude(slt => slt.SportLocation)
+                        .ThenInclude(sl => sl.Sport)
+                .FirstOrDefaultAsync(b => b.Id == BookingId);
+
+            if (BookingDetails == null)
+            {
+                NavigationManager.NavigateTo("/error");
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/error");
+        }
+    }
+
+    private bool IsValidCardDetails()
+    {
+        bool isCardValid = !string.IsNullOrEmpty(CardName) && !string.IsNullOrEmpty(CardNumber) &&
+                            !string.IsNullOrEmpty(ExpiryDate) && !string.IsNullOrEmpty(CVV);
+
+        if (isCardValid)
+        {
+            var cardNumberRegex = @"^\d{16}$";
+            var expiryDateRegex = @"^(0[1-9]|1[0-2])\/\d{2}$";  // MM/YY format
+            if (!System.Text.RegularExpressions.Regex.IsMatch(CardNumber, cardNumberRegex) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(ExpiryDate, expiryDateRegex))
+            {
+                PaymentMessage = "Invalid card details. Please check your card information.";
+                return false;
+            }
+        }
+        return isCardValid;
+    }
+
+    private async Task ApplyDiscount()
+    {
+        if (string.IsNullOrEmpty(DiscountCode))
+        {
+            DiscountMessage = "Please enter a discount code.";
+            return;
+        }
+
+        var discount = await _context.Discounts.FirstOrDefaultAsync(d => d.Code == DiscountCode);
+
+        if (discount == null)
+        {
+            DiscountMessage = "Invalid discount code.";
+            return;
+        }
+
+        // Check for the elderly discount eligibility based on age (50 or older)
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        var customerEmail = user.FindFirstValue(ClaimTypes.Email);
+        var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == customerEmail);
+
+        if (customer != null && discount.IsElderlyDiscount && customer.Age <= 50)
+        {
+            DiscountMessage = "You are not eligible for this discount. (Age 50 or older required)";
+            return;
+        }
+
+        // Ensure the discount is valid
+        if (!discount.IsValid())
+        {
+            DiscountMessage = "Discount code is expired or has exceeded the usage limit.";
+            return;
+        }
+
+        // Apply the discount to the total amount
+        if (discount.Percentage > 0)
+        {
+            BookingDetails.TotalAmount -= BookingDetails.TotalAmount * (discount.Percentage / 100);
+        }
+        else if (discount.Amount > 0)
+        {
+            BookingDetails.TotalAmount -= discount.Amount;
+        }
+
+        // Increment usage count for the discount
+        discount.IncrementUsage();
+        await _context.SaveChangesAsync();
+
+        DiscountMessage = $"Discount applied! New total: ${BookingDetails.TotalAmount}";
+    }
+
+    private async Task ProcessPayment()
+    {
+        try
+        {
+            var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            if (user.Identity.IsAuthenticated)
+            {
+                var customerEmail = user.FindFirstValue(ClaimTypes.Email);
+                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == customerEmail);
+                if (customer != null)
+                {
+                    var payment = new Payment
+                        {
+                            BookingId = BookingDetails.Id,
+                            Amount = BookingDetails.TotalAmount,
+                            PaymentMethod = SelectedPaymentMethod,
+                            PaymentDate = DateTime.Now,
+                            Status = "Successful",
+                            NameOnCard = CardName,
+                            CardNumber = CardNumber,
+                            ExpiryDate = ExpiryDate,
+                            CVV = CVV,
+                            CreatedBy = customer.FirstName + " " + customer.LastName,
+                            UpdatedBy = customer.FirstName + " " + customer.LastName,
+                            DateCreated = DateTime.Now,
+                            DateUpdated = DateTime.Now
+                        };
+
+                    _context.Payment.Add(payment);
+                    await _context.SaveChangesAsync();
+
+                    BookingDetails.BookingStatus = "Paid";
+                    BookingDetails.PaymentDate = DateTime.Now;
+                    BookingDetails.IsPaid = true;
+                    await _context.SaveChangesAsync();
+
+                    NavigationManager.NavigateTo($"/paymentsuccess?bookingId={BookingDetails.Id}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            PaymentMessage = $"Payment failed: {ex.Message}";
+        }
+    }
+}

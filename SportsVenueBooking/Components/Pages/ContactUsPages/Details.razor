@@ -1,0 +1,60 @@
+﻿@page "/contactus/details"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>ContactUs</h2>
+    <hr />
+    @if (contactus is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CustomerEmail</dt>
+            <dd class="col-sm-10">@contactus.CustomerEmail</dd>
+            <dt class="col-sm-2">Subject</dt>
+            <dd class="col-sm-10">@contactus.Subject</dd>
+            <dt class="col-sm-2">Message</dt>
+            <dd class="col-sm-10">@contactus.Message</dd>
+            <dt class="col-sm-2">SubmittedAt</dt>
+            <dd class="col-sm-10">@contactus.SubmittedAt</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@contactus.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@contactus.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@contactus.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@contactus.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/contactus/edit?id={contactus.Id}")">Edit</a> |
+            <a href="@($"/contactus")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private ContactUs? contactus;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        contactus = await context.ContactUs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (contactus is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

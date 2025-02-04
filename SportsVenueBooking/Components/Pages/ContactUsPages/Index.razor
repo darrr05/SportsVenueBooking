@@ -1,0 +1,43 @@
+﻿@page "/contactus"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SportsVenueBooking.Domain
+@using SportsVenueBooking.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="contactus/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.ContactUs">
+    <PropertyColumn Property="contactus => contactus.CustomerEmail" />
+    <PropertyColumn Property="contactus => contactus.Subject" />
+    <PropertyColumn Property="contactus => contactus.Message" />
+    <PropertyColumn Property="contactus => contactus.SubmittedAt" />
+    <PropertyColumn Property="contactus => contactus.DateCreated" />
+    <PropertyColumn Property="contactus => contactus.DateUpdated" />
+    <PropertyColumn Property="contactus => contactus.CreatedBy" />
+    <PropertyColumn Property="contactus => contactus.UpdatedBy" />
+
+    <TemplateColumn Context="contactus">
+        <a href="@($"contactus/edit?id={contactus.Id}")">Edit</a> |
+        <a href="@($"contactus/details?id={contactus.Id}")">Details</a> |
+        <a href="@($"contactus/delete?id={contactus.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SportsVenueBookingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

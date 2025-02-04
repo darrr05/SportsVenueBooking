@@ -1,1 +1,206 @@
-﻿
+﻿/* General container styles */
+.about-container {
+    background-color: #003366; /* Dark blue background */
+    color: white; /* White text color */
+    padding: 40px 20px; /* Increase padding on top and bottom */
+    font-family: Arial, sans-serif;
+    margin-top: 20px; /* Adjust margin at the top if necessary */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #001F3F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to the top of the page */
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 40px; /* Add space at the top of the page */
+}
+
+/* Mission section styles */
+.mission {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Company info section styles */
+.company-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
+    .company-info img {
+        max-width: 200px;
+        margin-bottom: 20px;
+    }
+
+/* Core values section styles */
+.core-values {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+    .core-values ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .core-values ul li {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+/* Explore venues section */
+.explore-venues {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Back to home link */
+.back-home {
+    text-align: center;
+}
+
+    .back-home a {
+        font-size: 1.2em;
+        color: #FFFFFF;
+        text-decoration: none;
+        border: 2px solid #FFFFFF;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        .back-home a:hover {
+            background-color: #FFFFFF;
+            color: #003366;
+        }
+
+/* Contact Us section styles */
+.contact-us {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+    .contact-us h2 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+
+    .contact-us ul {
+        list-style-type: none;
+        padding: 0;
+        font-size: 1.2em;
+    }
+
+        .contact-us ul li {
+            margin: 10px 0;
+        }
+
+    .contact-us a {
+        color: #00BFFF;
+        text-decoration: none;
+    }
+
+        .contact-us a:hover {
+            text-decoration: underline;
+        }
+
+/* Feedback section */
+.feedback-section {
+    margin-bottom: 50px; /* Add margin to create space from the next section */
+}
+
+/* Confirm Section (adds margin between button and form fields) */
+.confirm-section {
+    margin-top: 20px; /* Space above the button */
+}
+
+/* Submit Feedback Button Styling */
+.confirm-button {
+    background: linear-gradient(45deg, #00BFFF, #003366); /* Gradient background */
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px; /* Rounded corners */
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for hover and focus */
+    width: 100%;
+    max-width: 300px;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+    /* Hover effect */
+    .confirm-button:hover {
+        background: linear-gradient(45deg, #003366, #00BFFF); /* Reverse gradient on hover */
+        transform: scale(1.05); /* Slightly increase the size */
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Larger shadow on hover */
+    }
+
+    /* Disabled button styling */
+    .confirm-button:disabled {
+        background: #b0c4de; /* Light grey background when disabled */
+        color: #fff;
+        cursor: not-allowed;
+        box-shadow: none; /* Remove shadow when disabled */
+    }
+
+    /* Focus effect */
+    .confirm-button:focus {
+        outline: none;
+        border: 2px solid #00BFFF; /* Highlight border on focus */
+        box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Glowing effect on focus */
+    }
+
+/* Back to home link */
+.back-home {
+    text-align: center;
+    margin-top: 40px; /* Space between feedback section and back-home link */
+}
+
+    .back-home a {
+        font-size: 1.2em;
+        color: #FFFFFF;
+        text-decoration: none;
+        border: 2px solid #FFFFFF;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        .back-home a:hover {
+            background-color: #FFFFFF;
+            color: #003366;
+        }
+
+.core-values ul li:hover {
+    color: #00BFFF;
+    cursor: pointer;
+}

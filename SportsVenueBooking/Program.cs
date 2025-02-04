@@ -7,6 +7,8 @@ using SportsVenueBooking.Components.Account;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity.UI;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +49,7 @@ builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.Sign
     .AddDefaultTokenProviders();
 
 // Add email sender (replace with real email sender in production)
-builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, IEmailSender>();
+builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
 
 // Configure the cookie settings for identity
 builder.Services.ConfigureApplicationCookie(options =>
@@ -63,6 +65,25 @@ builder.Services.AddControllers()
 	{
 		options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
 	});
+
+builder.Services.AddAuthentication()
+   .AddFacebook(options =>
+   {
+	   IConfigurationSection FBAuthNSection = builder.Configuration.GetSection("Authentication:FB");
+	   options.ClientId = FBAuthNSection["ClientId"];
+	   options.ClientSecret = FBAuthNSection["ClientSecret"];
+   })
+   .AddMicrosoftAccount(microsoftOptions =>
+   {
+	   microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+	   microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+   })
+    .AddTwitter(twitterOptions =>
+    {
+	    twitterOptions.ConsumerKey = builder.Configuration["Authentication:Twitter:ConsumerAPIKey"];
+	    twitterOptions.ConsumerSecret = builder.Configuration["Authentication:Twitter:ConsumerSecret"];
+	    twitterOptions.RetrieveUserDetails = true;
+    });
 
 var app = builder.Build();
 

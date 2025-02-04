@@ -1,0 +1,66 @@
+﻿@page "/discounts/details"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Discount</h2>
+    <hr />
+    @if (discount is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Code</dt>
+            <dd class="col-sm-10">@discount.Code</dd>
+            <dt class="col-sm-2">Amount</dt>
+            <dd class="col-sm-10">@discount.Amount</dd>
+            <dt class="col-sm-2">Percentage</dt>
+            <dd class="col-sm-10">@discount.Percentage</dd>
+            <dt class="col-sm-2">MaxUses</dt>
+            <dd class="col-sm-10">@discount.MaxUses</dd>
+            <dt class="col-sm-2">UsageCount</dt>
+            <dd class="col-sm-10">@discount.UsageCount</dd>
+            <dt class="col-sm-2">IsElderlyDiscount</dt>
+            <dd class="col-sm-10">@discount.IsElderlyDiscount</dd>
+            <dt class="col-sm-2">ExpirationDate</dt>
+            <dd class="col-sm-10">@discount.ExpirationDate</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@discount.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@discount.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@discount.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@discount.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/discounts/edit?id={discount.Id}")">Edit</a> |
+            <a href="@($"/discounts")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Discount? discount;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        discount = await context.Discounts.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (discount is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

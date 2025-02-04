@@ -14,42 +14,77 @@
     <div class="col-md-4">
         <EditForm method="post" Model="SportLocationTimeslot" OnValidSubmit="AddSportLocationTimeslot" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- SportLocationId -->
             <div class="mb-3">
-                <label for="sportlocationid" class="form-label">SportLocationId:</label> 
-                <InputNumber id="sportlocationid" @bind-Value="SportLocationTimeslot.SportLocationId" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.SportLocationId" class="text-danger" /> 
-            </div>        
+                <label for="sportlocationid" class="form-label">SportLocationId:</label>
+                <InputSelect id="sportlocationid" @bind-Value="SportLocationTimeslot.SportLocationId" class="form-control">
+                    <option value="">-- Select Sport Location --</option>
+                    @if (SportLocations != null)
+                    {
+                        foreach (var sportlocation in SportLocations)
+                        {
+                            <option value="@sportlocation.Id">
+                                @sportlocation.Sport.Name, @sportlocation.Location.Name
+                            </option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => SportLocationTimeslot.SportLocationId" class="text-danger" />
+            </div>
+
+            <!-- TimeslotId -->
             <div class="mb-3">
-                <label for="timeslotid" class="form-label">TimeslotId:</label> 
-                <InputNumber id="timeslotid" @bind-Value="SportLocationTimeslot.TimeslotId" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.TimeslotId" class="text-danger" /> 
-            </div>        
+                <label for="timeslotid" class="form-label">TimeslotId:</label>
+                <InputSelect id="timeslotid" @bind-Value="SportLocationTimeslot.TimeslotId" class="form-control">
+                    <option value="">-- Select Timeslot --</option>
+                    @if (Timeslots != null)
+                    {
+                        foreach (var timeslot in Timeslots)
+                        {
+                            <option value="@timeslot.Id">@timeslot.Description</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => SportLocationTimeslot.TimeslotId" class="text-danger" />
+            </div>
+
+            <!-- Price -->
             <div class="mb-3">
-                <label for="price" class="form-label">Price:</label> 
-                <InputNumber id="price" @bind-Value="SportLocationTimeslot.Price" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.Price" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="datecreated" class="form-label">DateCreated:</label> 
-                <InputDate id="datecreated" @bind-Value="SportLocationTimeslot.DateCreated" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.DateCreated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="dateupdated" class="form-label">DateUpdated:</label> 
-                <InputDate id="dateupdated" @bind-Value="SportLocationTimeslot.DateUpdated" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.DateUpdated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="createdby" class="form-label">CreatedBy:</label> 
-                <InputText id="createdby" @bind-Value="SportLocationTimeslot.CreatedBy" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.CreatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="updatedby" class="form-label">UpdatedBy:</label> 
-                <InputText id="updatedby" @bind-Value="SportLocationTimeslot.UpdatedBy" class="form-control" /> 
-                <ValidationMessage For="() => SportLocationTimeslot.UpdatedBy" class="text-danger" /> 
-            </div>        
+                <label for="price" class="form-label">Price:</label>
+                <InputNumber id="price" @bind-Value="SportLocationTimeslot.Price" class="form-control" />
+                <ValidationMessage For="() => SportLocationTimeslot.Price" class="text-danger" />
+            </div>
+
+            <!-- DateCreated -->
+            <div class="mb-3" hidden>
+                <label for="datecreated" class="form-label">DateCreated:</label>
+                <InputDate id="datecreated" @bind-Value="SportLocationTimeslot.DateCreated" class="form-control" />
+                <ValidationMessage For="() => SportLocationTimeslot.DateCreated" class="text-danger" />
+            </div>
+
+            <!-- DateUpdated -->
+            <div class="mb-3" hidden>
+                <label for="dateupdated" class="form-label">DateUpdated:</label>
+                <InputDate id="dateupdated" @bind-Value="SportLocationTimeslot.DateUpdated" class="form-control" />
+                <ValidationMessage For="() => SportLocationTimeslot.DateUpdated" class="text-danger" />
+            </div>
+
+            <!-- CreatedBy -->
+            <div class="mb-3" hidden>
+                <label for="createdby" class="form-label">CreatedBy:</label>
+                <InputText id="createdby" @bind-Value="SportLocationTimeslot.CreatedBy" class="form-control" />
+                <ValidationMessage For="() => SportLocationTimeslot.CreatedBy" class="text-danger" />
+            </div>
+
+            <!-- UpdatedBy -->
+            <div class="mb-3" hidden>
+                <label for="updatedby" class="form-label">UpdatedBy:</label>
+                <InputText id="updatedby" @bind-Value="SportLocationTimeslot.UpdatedBy" class="form-control" />
+                <ValidationMessage For="() => SportLocationTimeslot.UpdatedBy" class="text-danger" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -63,10 +98,35 @@
     [SupplyParameterFromForm]
     private SportLocationTimeslot SportLocationTimeslot { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private IList<SportLocation> SportLocations;
+    private IList<Timeslot> Timeslots;
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        SportLocations = await context.SportLocation
+            .Include(s => s.Sport)      // Include Sport details
+            .Include(s => s.Location)   // Include Location details
+            .ToListAsync();
+        Timeslots = await context.Timeslot.ToListAsync();
+    }
+
     private async Task AddSportLocationTimeslot()
     {
         using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the CreatedBy and UpdatedBy fields.
+        SportLocationTimeslot.CreatedBy = userId;
+        SportLocationTimeslot.UpdatedBy = userId;
+        //Set the DateCreated and DateUpdated fields to the current date and time.
+        SportLocationTimeslot.DateCreated = DateTime.Now;
+        SportLocationTimeslot.DateUpdated = DateTime.Now;
+
         context.SportLocationTimeslots.Add(SportLocationTimeslot);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/sportlocationtimeslots");

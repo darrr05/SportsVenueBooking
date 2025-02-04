@@ -1,165 +1,80 @@
 ﻿@page "/dashboard"
-@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using SportsVenueBooking.Data
 @using SportsVenueBooking.Domain
 @using System.Security.Claims
-@rendermode InteractiveServer
-@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>My Bookings Dashboard</PageTitle>
+<h3>Your Bookings</h3>
 
-<head>
-    <link rel="stylesheet" href="styles/BookingDashboard.css">
-</head>
-
-<div class="container">
-    <div class="header">
-        <h1>My Bookings</h1>
-    </div>
-
-    <div class="booking-tabs">
-        <button class="tab-button @(currentTab == "upcoming" ? "active" : "")"
-                @onclick='() => currentTab = "upcoming"'>
-            Upcoming
-        </button>
-        <button class="tab-button @(currentTab == "past" ? "active" : "")"
-                @onclick='() => currentTab = "past"'>
-            Past
-        </button>
-    </div>
-
-    @if (isLoading)
-    {
-        <div class="loading">Loading...</div>
-    }
-    else if (!bookings.Any())
-    {
-        <div class="no-bookings">
-            <p>No @currentTab bookings found.</p>
-            <a href="/Bookings_Sport" class="book-now-button">Book Now</a>
-        </div>
-    }
-    else
-    {
-        <div class="bookings-grid">
-            @foreach (var booking in FilteredBookings)
-            {
-                <div class="booking-card">
-                    <div class="booking-header">
-                        <h3>@booking.SportName</h3>
-                        <span class="status @booking.BookingStatus.ToLower()">
-                            @booking.BookingStatus
-                        </span>
-                    </div>
-                    <div class="booking-details">
-                        <p><strong>Location:</strong> @booking.LocationName</p>
-                        <p><strong>Date:</strong> @booking.BookingDate.ToShortDateString()</p>
-                        <p><strong>Time:</strong> @booking.TimeslotDescription</p>
-                        <p><strong>Amount:</strong> $@booking.TotalAmount.ToString("F2")</p>
-                    </div>
-                    @if (booking.BookingDate > DateTime.Now && booking.BookingStatus != "Cancelled")
-                    {
-                        <button class="cancel-button" @onclick="() => ShowCancellationModal(booking)">
-                            Cancel Booking
-                        </button>
-                    }
-                </div>
-            }
-        </div>
-    }
-</div>
-
-<!-- Cancellation Modal -->
-@if (showCancellationModal)
+@if (Bookings.Any())
 {
-    <div class="modal">
-        <div class="modal-content">
-            <h2>Cancel Booking</h2>
-            <p>Are you sure you want to cancel this booking?</p>
-            <div class="form-group">
-                <label for="cancellationReason">Reason for cancellation:</label>
-                <textarea id="cancellationReason"
-                          @bind="cancellationReason"
-                          placeholder="Please provide a reason...">
-                                </textarea>
-            </div>
-            <div class="modal-buttons">
-                <button class="cancel" @onclick="() => showCancellationModal = false">No, Keep Booking</button>
-                <button class="confirm" @onclick="ConfirmCancellation">Yes, Cancel Booking</button>
-            </div>
+    @foreach (var booking in Bookings)
+    {
+        <div class="booking-item">
+            <p><strong>Booking ID:</strong> @booking.Id</p>
+            <p><strong>Sport:</strong> @booking.SportLocationTimeslot?.SportLocation?.Sport?.Name</p>
+            <p><strong>Location:</strong> @booking.SportLocationTimeslot?.SportLocation?.Location?.Name</p>
+            <p><strong>Time Slot:</strong> @booking.SportLocationTimeslot?.Timeslot?.Description</p>
+            <p><strong>Date:</strong> @booking.BookingDate.ToString("yyyy-MM-dd")</p>
+            <p><strong>Status:</strong> @booking.BookingStatus</p>
         </div>
-    </div>
+    }
+}
+else
+{
+    <p>No bookings found.</p>
 }
 
 @code {
-    private List<Bookings> bookings = new();
-    private string currentTab = "upcoming";
-    private bool isLoading = true;
-    private bool showCancellationModal = false;
-    private string cancellationReason = "";
-    private Bookings? selectedBooking;
-
-    [Inject] private SportsVenueBookingContext DbContext { get; set; }
-    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; }
+    private List<Bookings> Bookings { get; set; } = new();
+    [Inject] private SportsVenueBookingContext _context { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
-
-    private IEnumerable<Bookings> FilteredBookings => currentTab switch
-    {
-        "upcoming" => bookings.Where(b => b.BookingDate >= DateTime.Now),
-        "past" => bookings.Where(b => b.BookingDate < DateTime.Now),
-        _ => bookings
-    };
+    private string CustomerEmail { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBookings();
-    }
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-    private async Task LoadBookings()
-    {
-        try
+        if (queryParams.TryGetValue("customerid", out var customerIdString) && int.TryParse(customerIdString, out var customerId))
         {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var customerId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(customerId) && int.TryParse(customerId, out var parsedCustomerId))
+            await LoadBookings(customerId);
+        }
+        else
+        {
+            var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            if (user.Identity.IsAuthenticated)
             {
-                bookings = await DbContext.Bookings
-                    .Include(b => b.Sport)
-                    .Include(b => b.Location)
-                    .Where(b => b.CustomerId == parsedCustomerId)
-                    .ToListAsync();
+                CustomerEmail = user.FindFirstValue(ClaimTypes.Email);
+                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == CustomerEmail);
+                if (customer != null)
+                {
+                    await LoadBookings(customer.Id);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/login");
+                }
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/login");
             }
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error loading bookings: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
     }
 
-    private void ShowCancellationModal(Bookings booking)
+    private async Task LoadBookings(int customerId)
     {
-        selectedBooking = booking;
-        showCancellationModal = true;
-    }
-
-    private async Task ConfirmCancellation()
-    {
-        if (selectedBooking != null)
-        {
-            selectedBooking.BookingStatus = "Cancelled";
-            selectedBooking.CancellationReason = cancellationReason;
-
-            DbContext.Bookings.Update(selectedBooking);
-            await DbContext.SaveChangesAsync();
-            showCancellationModal = false;
-            await LoadBookings();
-        }
+        // Load the sport location timeslots with necessary relationships
+        Bookings = await _context.Bookings
+            .Include(slt => slt.SportLocationTimeslot) // Ensure we include the SportLocation
+                .ThenInclude(sl => sl.SportLocation.Sport) // Include the Sport related entity
+            .Include(slt => slt.SportLocationTimeslot) // Again include the SportLocation
+                .ThenInclude(sl => sl.SportLocation.Location) // Include the Location related entity
+            .Include(slt => slt.SportLocationTimeslot.Timeslot) // Include the Timeslot entity
+            .ToListAsync();
     }
 }

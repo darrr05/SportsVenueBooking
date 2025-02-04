@@ -1,0 +1,70 @@
+﻿@page "/payments/details"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Payment</h2>
+    <hr />
+    @if (payment is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">BookingId</dt>
+            <dd class="col-sm-10">@payment.BookingId</dd>
+            <dt class="col-sm-2">Amount</dt>
+            <dd class="col-sm-10">@payment.Amount</dd>
+            <dt class="col-sm-2">PaymentMethod</dt>
+            <dd class="col-sm-10">@payment.PaymentMethod</dd>
+            <dt class="col-sm-2">PaymentDate</dt>
+            <dd class="col-sm-10">@payment.PaymentDate</dd>
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@payment.Status</dd>
+            <dt class="col-sm-2">NameOnCard</dt>
+            <dd class="col-sm-10">@payment.NameOnCard</dd>
+            <dt class="col-sm-2">CardNumber</dt>
+            <dd class="col-sm-10">@payment.CardNumber</dd>
+            <dt class="col-sm-2">ExpiryDate</dt>
+            <dd class="col-sm-10">@payment.ExpiryDate</dd>
+            <dt class="col-sm-2">CVV</dt>
+            <dd class="col-sm-10">@payment.CVV</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@payment.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@payment.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@payment.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@payment.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/payments/edit?id={payment.Id}")">Edit</a> |
+            <a href="@($"/payments")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Payment? payment;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        payment = await context.Payment.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (payment is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

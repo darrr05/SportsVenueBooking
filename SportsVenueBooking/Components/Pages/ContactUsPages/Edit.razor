@@ -1,0 +1,124 @@
+﻿@page "/contactus/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>ContactUs</h2>
+<hr />
+@if (ContactUs is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="ContactUs" OnValidSubmit="UpdateContactUs" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="ContactUs.Id" value="@ContactUs.Id" />
+                <div class="mb-3">
+                    <label for="customeremail" class="form-label">CustomerEmail:</label>
+                    <InputText id="customeremail" @bind-Value="ContactUs.CustomerEmail" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.CustomerEmail" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject:</label>
+                    <InputText id="subject" @bind-Value="ContactUs.Subject" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.Subject" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message:</label>
+                    <InputText id="message" @bind-Value="ContactUs.Message" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.Message" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="submittedat" class="form-label">SubmittedAt:</label>
+                    <InputDate id="submittedat" @bind-Value="ContactUs.SubmittedAt" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.SubmittedAt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="ContactUs.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="ContactUs.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="ContactUs.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="ContactUs.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => ContactUs.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/contactus">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private ContactUs? ContactUs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ContactUs ??= await context.ContactUs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ContactUs is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateContactUs()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(ContactUs!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ContactUsExists(ContactUs!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/contactus");
+    }
+
+    private bool ContactUsExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.ContactUs.Any(e => e.Id == id);
+    }
+}

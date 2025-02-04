@@ -1,13 +1,16 @@
-﻿.container {
+﻿/* Container for the dashboard */
+.container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
+/* Header styling */
 .header {
     margin-bottom: 30px;
 }
 
+/* Tabs for upcoming and past bookings */
 .booking-tabs {
     display: flex;
     gap: 10px;
@@ -28,12 +31,14 @@
         color: white;
     }
 
+/* Grid layout for booking cards */
 .bookings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
 }
 
+/* Individual booking card style */
 .booking-card {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -42,6 +47,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Header in booking card */
 .booking-header {
     display: flex;
     justify-content: space-between;
@@ -49,6 +55,7 @@
     margin-bottom: 15px;
 }
 
+/* Status tags inside booking cards */
 .status {
     padding: 5px 10px;
     border-radius: 15px;
@@ -67,10 +74,12 @@
         background-color: #ffcccb;
     }
 
+/* Details section inside booking card */
 .booking-details {
     margin-bottom: 15px;
 }
 
+/* Cancel button for bookings */
 .cancel-button {
     width: 100%;
     padding: 8px;
@@ -81,18 +90,52 @@
     cursor: pointer;
 }
 
+    .cancel-button:hover {
+        background-color: #c82333;
+    }
+
+/* Loading spinner styles */
+.spinner {
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error message styling */
+.error {
+    color: red;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Modal for cancellation confirmation */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
+/* Content inside the modal */
 .modal-content {
     background-color: white;
     padding: 20px;
@@ -101,6 +144,7 @@
     max-width: 500px;
 }
 
+/* Buttons inside the modal */
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
@@ -108,6 +152,31 @@
     margin-top: 20px;
 }
 
+.cancel {
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+    .cancel:hover {
+        background-color: #c0392b;
+    }
+
+.confirm {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+    .confirm:hover {
+        background-color: #2980b9;
+    }
+
+/* No bookings found section */
 .no-bookings {
     text-align: center;
     padding: 40px;
@@ -121,4 +190,22 @@
     text-decoration: none;
     border-radius: 5px;
     margin-top: 15px;
+}
+
+    .book-now-button:hover {
+        background-color: #2980b9;
+    }
+
+/* Spinner for loading state */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+/* Style for when there are no bookings available */
+.no-bookings p {
+    font-size: 18px;
+    margin-bottom: 15px;
 }

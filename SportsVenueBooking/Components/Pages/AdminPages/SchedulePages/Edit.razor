@@ -24,18 +24,29 @@ else
                 <input type="hidden" name="Schedule.Id" value="@Schedule.Id" />
                 <div class="mb-3">
                     <label for="sportlocationtimeslotid" class="form-label">SportLocationTimeslotId:</label>
-                    <InputNumber id="sportlocationtimeslotid" @bind-Value="Schedule.SportLocationTimeslotId" class="form-control" />
+                    <InputSelect id="sportlocationtimeslotid" @bind-Value="Schedule.SportLocationTimeslotId" class="form-control">
+                        <option value="">-- Select Sport Location Timeslot --</option>
+                        @if (SportLocationTimeslots != null && SportLocationTimeslots.Any())
+                        {
+                            foreach (var sportlocationtimeslot in SportLocationTimeslots)
+                            {
+                                <option value="@sportlocationtimeslot.Id">
+                                    @sportlocationtimeslot.SportLocation.Sport.Name, @sportlocationtimeslot.SportLocation.Location.Name
+                                    (Timeslot: @sportlocationtimeslot.Timeslot.Description)
+                                </option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>No available timeslots</option>
+                        }
+                    </InputSelect>
                     <ValidationMessage For="() => Schedule.SportLocationTimeslotId" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="availableslots" class="form-label">AvailableSlots:</label>
                     <InputNumber id="availableslots" @bind-Value="Schedule.AvailableSlots" class="form-control" />
                     <ValidationMessage For="() => Schedule.AvailableSlots" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="totalprice" class="form-label">totalPrice:</label>
-                    <InputNumber id="totalprice" @bind-Value="Schedule.totalPrice" class="form-control" />
-                    <ValidationMessage For="() => Schedule.totalPrice" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="scheduleddate" class="form-label">ScheduledDate:</label>
@@ -47,7 +58,7 @@ else
                     <InputDate id="datecreated" @bind-Value="Schedule.DateCreated" class="form-control" />
                     <ValidationMessage For="() => Schedule.DateCreated" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="dateupdated" class="form-label">DateUpdated:</label>
                     <InputDate id="dateupdated" @bind-Value="Schedule.DateUpdated" class="form-control" />
                     <ValidationMessage For="() => Schedule.DateUpdated" class="text-danger" />
@@ -57,7 +68,7 @@ else
                     <InputText id="createdby" @bind-Value="Schedule.CreatedBy" class="form-control" />
                     <ValidationMessage For="() => Schedule.CreatedBy" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="updatedby" class="form-label">UpdatedBy:</label>
                     <InputText id="updatedby" @bind-Value="Schedule.UpdatedBy" class="form-control" />
                     <ValidationMessage For="() => Schedule.UpdatedBy" class="text-danger" />
@@ -78,6 +89,12 @@ else
 
     [SupplyParameterFromForm]
     private Schedule? Schedule { get; set; }
+    private IList<SportLocationTimeslot> SportLocationTimeslots { get; set; }
+
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,6 +105,15 @@ else
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+        // Load the sport location timeslots with necessary relationships
+        SportLocationTimeslots = await context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation) // Ensure we include the SportLocation
+                .ThenInclude(sl => sl.Sport) // Include the Sport related entity
+            .Include(slt => slt.SportLocation) // Again include the SportLocation
+                .ThenInclude(sl => sl.Location) // Include the Location related entity
+            .Include(slt => slt.Timeslot) // Include the Timeslot entity
+            .ToListAsync();
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -95,6 +121,12 @@ else
     private async Task UpdateSchedule()
     {
         using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the UpdatedBy fields.
+        Schedule.UpdatedBy = userId;
+        //Set the DateUpdated fields to the current date and time.
+        Schedule.DateUpdated = DateTime.Now;
+
         context.Attach(Schedule!).State = EntityState.Modified;
 
         try

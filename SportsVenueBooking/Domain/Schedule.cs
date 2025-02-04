@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace SportsVenueBooking.Domain
+﻿namespace SportsVenueBooking.Domain
 {
 	public class Schedule : BaseDomainModel
 	{
@@ -9,7 +7,6 @@ namespace SportsVenueBooking.Domain
 		public SportLocationTimeslot? SportLocationTimeslot { get; set; }  // Navigation property to SportLocation
 
 		public int AvailableSlots { get; set; }
-		public double totalPrice { get; set; }
 
 		private DateTime _scheduledDate;
 

@@ -1,0 +1,48 @@
+﻿@page "/payments"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SportsVenueBooking.Domain
+@using SportsVenueBooking.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="payments/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Payment">
+    <PropertyColumn Property="payment => payment.BookingId" />
+    <PropertyColumn Property="payment => payment.Amount" />
+    <PropertyColumn Property="payment => payment.PaymentMethod" />
+    <PropertyColumn Property="payment => payment.PaymentDate" />
+    <PropertyColumn Property="payment => payment.Status" />
+    <PropertyColumn Property="payment => payment.NameOnCard" />
+    <PropertyColumn Property="payment => payment.CardNumber" />
+    <PropertyColumn Property="payment => payment.ExpiryDate" />
+    <PropertyColumn Property="payment => payment.CVV" />
+    <PropertyColumn Property="payment => payment.DateCreated" />
+    <PropertyColumn Property="payment => payment.DateUpdated" />
+    <PropertyColumn Property="payment => payment.CreatedBy" />
+    <PropertyColumn Property="payment => payment.UpdatedBy" />
+
+    <TemplateColumn Context="payment">
+        <a href="@($"payments/edit?id={payment.Id}")">Edit</a> |
+        <a href="@($"payments/details?id={payment.Id}")">Details</a> |
+        <a href="@($"payments/delete?id={payment.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SportsVenueBookingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

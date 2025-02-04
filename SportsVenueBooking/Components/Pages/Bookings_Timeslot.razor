@@ -2,6 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using SportsVenueBooking.Data
 @using SportsVenueBooking.Domain
+@using System.Text.Json
 @rendermode InteractiveServer
 
 <PageTitle>Bookings_Timeslot</PageTitle>
@@ -24,13 +25,15 @@
     </div>
 
     <div class="timeslot-grid">
-        @if (Timeslots.Any())
+        @if (Schedules.Any())
         {
-            @foreach (var timeslot in Timeslots)
+            @foreach (var schedule in Schedules)
             {
-                <button class="timeslot-button @(SelectedTimeslots.Contains(timeslot) ? "selected" : "")"
-                @onclick="() => SelectTimeslot(timeslot)">
-                    @timeslot.Description
+                <button class="timeslot-button @(SelectedSchedules.Contains(schedule) ? "selected" : "")"
+                        @onclick="() => SelectSchedule(schedule)"
+                        disabled="@(schedule.AvailableSlots == 0)"
+                        style="@(schedule.AvailableSlots == 0 ? "background-color: gray; cursor: not-allowed;" : "")">
+                    @schedule.SportLocationTimeslot.Timeslot.Description (@schedule.AvailableSlots slots left)
                 </button>
             }
         }
@@ -42,14 +45,14 @@
 
     <div class="navigation">
         <a href="/Bookings_Location" class="back-to-location">Back</a>
-        <button class="confirm-button" @onclick="ConfirmBooking" disabled="@(SelectedTimeslots.Count == 0)">Confirm</button>
+        <button class="confirm-button" @onclick="ConfirmBooking" disabled="@(SelectedSchedules.Count == 0)">Confirm</button>
     </div>
 </div>
 
 @code {
     private DateTime _selectedDate;
-    private List<Timeslot> Timeslots { get; set; } = new();
-    private List<Timeslot> SelectedTimeslots { get; set; } = new();
+    private List<Schedule> Schedules { get; set; } = new();
+    private List<Schedule> SelectedSchedules { get; set; } = new();
     private string SelectedSportName { get; set; }
     private string SelectedLocationName { get; set; }
 
@@ -66,16 +69,10 @@
             {
                 _selectedDate = value;
                 _ = JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedDate", _selectedDate.ToString("yyyy-MM-dd"));
-                _ = LoadTimeslots(); // Reload timeslots when the date is changed
+                SelectedSchedules.Clear();  // Clear previous selections
+                _ = LoadSchedules(); // Reload schedules when the date is changed
             }
         }
-    }
-
-    // Initialize the default date
-    protected override Task OnInitializedAsync()
-    {
-        _selectedDate = DateTime.Today;
-        return base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -91,90 +88,65 @@
             }
             else
             {
-                await LoadTimeslots(); // Fetch timeslots after initialization
+                await LoadSchedules(); // Fetch schedules after initialization
                 StateHasChanged(); // Trigger re-render
             }
         }
     }
 
-    private async Task LoadTimeslots()
+    private async Task LoadSchedules()
     {
-        Timeslots = await DbContext.Schedules
+        Schedules = await DbContext.Schedules
+            .Include(s => s.SportLocationTimeslot)
+                .ThenInclude(slt => slt.Timeslot)
             .Where(s => s.ScheduledDate.Date == SelectedDate.Date &&
                         s.SportLocationTimeslot.SportLocation.Sport.Name == SelectedSportName &&
-                        s.SportLocationTimeslot.SportLocation.Location.Name == SelectedLocationName &&
-                        s.AvailableSlots > 0)
-            .Select(s => s.SportLocationTimeslot.Timeslot)  // Select related Timeslot
-            .Distinct()
+                        s.SportLocationTimeslot.SportLocation.Location.Name == SelectedLocationName)
             .ToListAsync();
 
-        StateHasChanged();  // Trigger a re-render after timeslots are loaded
+        StateHasChanged();  // Trigger a re-render after schedules are loaded
     }
 
-
-
-    private async Task SelectTimeslot(Timeslot timeslot)
+    private void SelectSchedule(Schedule schedule)
     {
-        // Toggle the timeslot selection
-        if (SelectedTimeslots.Contains(timeslot))
+        // Toggle the schedule selection
+        if (SelectedSchedules.Contains(schedule))
         {
-            SelectedTimeslots.Remove(timeslot); // Deselect if already selected
+            SelectedSchedules.Remove(schedule); // Deselect if already selected
         }
         else
         {
-            if (SelectedTimeslots.Count < 2)  // Limit selection to 2 timeslots
+            if (SelectedSchedules.Count < 2)  // Limit selection to 2 schedules
             {
-                SelectedTimeslots.Add(timeslot); // Select the timeslot
+                SelectedSchedules.Add(schedule); // Select the schedule
             }
         }
 
-        // Store the selected timeslots in sessionStorage
-        if (SelectedTimeslots.Any())
+        // Store selected timeslot information in sessionStorage
+        var selectedTimeslots = SelectedSchedules.Select(s => new
         {
-            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedTimeslots",
-                string.Join(",", SelectedTimeslots.Select(t => t.Description)));
-        }
-        else
-        {
-            await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "SelectedTimeslots");
-        }
+            s.SportLocationTimeslot.Timeslot.Description,
+            s.SportLocationTimeslot.Price
+        }).ToList();
+
+        var timeslotsJson = JsonSerializer.Serialize(selectedTimeslots);
+        _ = JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedTimeslots", timeslotsJson);
 
         StateHasChanged(); // Trigger re-render after selection
     }
 
-
-
     private async Task ConfirmBooking()
     {
-        if (SelectedTimeslots.Any())
+        if (SelectedSchedules.Any())
         {
-            foreach (var timeslot in SelectedTimeslots)
-            {
-                // Find the related schedule entry for the selected timeslot
-                var schedule = await DbContext.Schedules
-                    .Include(s => s.SportLocationTimeslot)
-                    .FirstOrDefaultAsync(s =>
-                        s.ScheduledDate == SelectedDate &&
-                        s.SportLocationTimeslot.TimeslotId == timeslot.Id &&
-                        s.SportLocationTimeslot.SportLocation.Sport.Name == SelectedSportName &&
-                        s.SportLocationTimeslot.SportLocation.Location.Name == SelectedLocationName);
-                // Handle cases where no schedule is found or slots are unavailable
-                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "SelectedTimeslots", timeslot.Description);
-                await JSRuntime.InvokeVoidAsync("alert", $"timeslot: {SelectedTimeslots}");
-            }
-
-            // Save changes (decremented slots only)
-            await DbContext.SaveChangesAsync();
-
-            // Notify the user or redirect after successful update
+            // Notify the user or redirect to the next step
             await JSRuntime.InvokeVoidAsync("alert", "Your timeslots have been reserved!");
             NavigationManager.NavigateTo("/Checkout");
         }
         else
         {
-            // Alert the user if no timeslots are selected
+            // Alert the user if no schedules are selected
             await JSRuntime.InvokeVoidAsync("alert", "Please select at least one timeslot.");
         }
     }
-
 }

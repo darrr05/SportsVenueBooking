@@ -19,6 +19,9 @@ namespace SportsVenueBooking.Data
 		public DbSet<Location> Location { get; set; } = default!;
 		public DbSet<Timeslot> Timeslot { get; set; } = default!;
 		public DbSet<Schedule> Schedules { get; set; } = default!;
+		public DbSet<Payment> Payment { get; set; } = default!;
+		public DbSet<Discount> Discounts { get; set; } = default!;
+		public DbSet<ContactUs> ContactUs { get; set; } = default!;
 		public DbSet<SportLocation> SportLocation { get; set; } = default!;
 		public DbSet<SportLocationTimeslot> SportLocationTimeslots { get; set; } = default!;
 

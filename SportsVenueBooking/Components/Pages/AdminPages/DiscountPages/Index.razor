@@ -1,0 +1,46 @@
+﻿@page "/discounts"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SportsVenueBooking.Domain
+@using SportsVenueBooking.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="discounts/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Discounts">
+    <PropertyColumn Property="discount => discount.Code" />
+    <PropertyColumn Property="discount => discount.Amount" />
+    <PropertyColumn Property="discount => discount.Percentage" />
+    <PropertyColumn Property="discount => discount.MaxUses" />
+    <PropertyColumn Property="discount => discount.UsageCount" />
+    <PropertyColumn Property="discount => discount.IsElderlyDiscount" />
+    <PropertyColumn Property="discount => discount.ExpirationDate" />
+    <PropertyColumn Property="discount => discount.DateCreated" />
+    <PropertyColumn Property="discount => discount.DateUpdated" />
+    <PropertyColumn Property="discount => discount.CreatedBy" />
+    <PropertyColumn Property="discount => discount.UpdatedBy" />
+
+    <TemplateColumn Context="discount">
+        <a href="@($"discounts/edit?id={discount.Id}")">Edit</a> |
+        <a href="@($"discounts/details?id={discount.Id}")">Details</a> |
+        <a href="@($"discounts/delete?id={discount.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private SportsVenueBookingContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

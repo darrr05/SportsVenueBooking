@@ -176,66 +176,6 @@ namespace SportsVenueBooking.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CardBrand")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastFourDigits")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeChargeId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeReceiptUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId")
-                        .IsUnique();
-
-                    b.ToTable("Payment");
-                });
-
             modelBuilder.Entity("SportsVenueBooking.Data.SportsVenueBookingUser", b =>
                 {
                     b.Property<string>("Id")
@@ -311,7 +251,7 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = "3781efa7-66dc-47f0-860f-e506d04102e4",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "9b4fbc8c-2f67-4d0b-83e2-9c6a1f6816d3",
+                            ConcurrencyStamp = "6d5b1f62-a189-4d49-969d-cf5245e3c968",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -319,9 +259,9 @@ namespace SportsVenueBooking.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@LOCALHOST.COM",
                             NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEOTkDQ0GhhApmn4NnXx8f93niSUGwgGzQduXP1XVH29P96tfkYv9KuOTkeTpdcWu2A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPTYqHmgG/yq2i6vkLTF77ts2NBp94b1EqTgAHv2clu5++HywhwYImV8GjDTqTe4gg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "bfd8c171-4f0b-4a35-8ca8-f982dc3285c4",
+                            SecurityStamp = "c29ca9b3-2282-4882-87b6-a7ca76e2d365",
                             TwoFactorEnabled = false,
                             UserName = "admin@localhost.com"
                         });
@@ -342,7 +282,7 @@ namespace SportsVenueBooking.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CancellationDate")
+                    b.Property<DateTime>("CancellationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CancellationReason")
@@ -357,38 +297,20 @@ namespace SportsVenueBooking.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateOut")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LocationName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PaymentDate")
+                    b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SportId")
+                    b.Property<int?>("SportLocationId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SportName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TimeslotDescription")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("SportLocationTimeslotId")
+                        .HasColumnType("int");
 
                     b.Property<double>("TotalAmount")
                         .HasColumnType("float");
@@ -403,13 +325,53 @@ namespace SportsVenueBooking.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("SportLocationId");
 
-                    b.HasIndex("SportId");
+                    b.HasIndex("SportLocationTimeslotId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("SportsVenueBooking.Domain.ContactUs", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactUs");
                 });
 
             modelBuilder.Entity("SportsVenueBooking.Domain.Customer", b =>
@@ -460,6 +422,53 @@ namespace SportsVenueBooking.Migrations
                     b.ToTable("Customer");
                 });
 
+            modelBuilder.Entity("SportsVenueBooking.Domain.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsElderlyDiscount")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaxUses")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Percentage")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discounts");
+                });
+
             modelBuilder.Entity("SportsVenueBooking.Domain.Location", b =>
                 {
                     b.Property<int>("Id")
@@ -501,8 +510,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 1,
                             Address = "5 Bishan St 14, Singapore 579783",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6106),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6117),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7817),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7829),
                             Name = "Bishan Sports Hall",
                             UpdatedBy = "System",
                             capacity = 5000
@@ -512,8 +521,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 2,
                             Address = "57 Anchorvale Rd, Singapore 544964",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6122),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6123),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7831),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7832),
                             Name = "Sengkang Sports Hall",
                             UpdatedBy = "System",
                             capacity = 2000
@@ -523,8 +532,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 3,
                             Address = "21 Jurong East St 31, Singapore 609517",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6126),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6127),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7833),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7834),
                             Name = "Jurong East Sports Hall",
                             UpdatedBy = "System",
                             capacity = 4000
@@ -534,8 +543,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 4,
                             Address = "1 Tampines Walk, Singapore 528523",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6130),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6131),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7836),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7836),
                             Name = "Tampines Sports Hall",
                             UpdatedBy = "System",
                             capacity = 3500
@@ -545,8 +554,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 5,
                             Address = "3 Woodlands St 13, Singapore 738600",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6134),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6135),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7838),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7839),
                             Name = "Woodlands Sports Hall",
                             UpdatedBy = "System",
                             capacity = 2500
@@ -556,8 +565,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 6,
                             Address = "120 Pasir Ris Central, Singapore 519640",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6138),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6140),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7841),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7841),
                             Name = "Pasir Ris Sports Hall",
                             UpdatedBy = "System",
                             capacity = 2200
@@ -567,8 +576,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 7,
                             Address = "1 Yishun Ave 3, Singapore 768101",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6143),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6144),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7843),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7843),
                             Name = "Yishun Sports Hall",
                             UpdatedBy = "System",
                             capacity = 2700
@@ -578,8 +587,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 8,
                             Address = "2 Bukit Batok St 21, Singapore 659604",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6147),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6148),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7845),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7846),
                             Name = "Bukit Gombak Sports Hall",
                             UpdatedBy = "System",
                             capacity = 3000
@@ -589,8 +598,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 9,
                             Address = "473 Stirling Rd, Singapore 148947",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6151),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6152),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7847),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7848),
                             Name = "Queenstown Sports Centre",
                             UpdatedBy = "System",
                             capacity = 1500
@@ -600,8 +609,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 10,
                             Address = "30 Bedok North Dr, Singapore 469658",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6155),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6156),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7850),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7850),
                             Name = "Bedok Sports Centre",
                             UpdatedBy = "System",
                             capacity = 2200
@@ -611,8 +620,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 11,
                             Address = "21 Canberra Link, Singapore 768137",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6159),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6160),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7852),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7852),
                             Name = "Bukit Canberra Sports Centre",
                             UpdatedBy = "System",
                             capacity = 4000
@@ -622,8 +631,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 12,
                             Address = "60 Simei St 1, Singapore 529944",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6163),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6164),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7854),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7855),
                             Name = "Changi Simei Sports Hall",
                             UpdatedBy = "System",
                             capacity = 1800
@@ -633,8 +642,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 13,
                             Address = "23 Serangoon North Ave 1, Singapore 555881",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6167),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6168),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7856),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7857),
                             Name = "Serangoon Sports Centre",
                             UpdatedBy = "System",
                             capacity = 2800
@@ -644,8 +653,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 14,
                             Address = "900 Tiong Bahru Rd, Singapore 158790",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6171),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6172),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7859),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7859),
                             Name = "Delta Sports Centre",
                             UpdatedBy = "System",
                             capacity = 3500
@@ -655,8 +664,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 15,
                             Address = "21 Choa Chu Kang Ave 4, Singapore 689812",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6175),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6176),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7861),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7862),
                             Name = "Choa Chu Kang Sports Centre",
                             UpdatedBy = "System",
                             capacity = 2500
@@ -666,8 +675,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 16,
                             Address = "15 Francis Thomas Dr, Singapore 359342",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6179),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6181),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7863),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7864),
                             Name = "St. Andrew's Secondary School Sports Hall",
                             UpdatedBy = "System",
                             capacity = 800
@@ -677,8 +686,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 17,
                             Address = "1 Raffles Institution Lane, Singapore 575954",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6184),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6185),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7866),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7866),
                             Name = "Raffles Institution Sports Hall",
                             UpdatedBy = "System",
                             capacity = 600
@@ -688,8 +697,8 @@ namespace SportsVenueBooking.Migrations
                             Id = 18,
                             Address = "25 Winstedt Rd, Singapore 227977",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6188),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6189),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7868),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7869),
                             Name = "Anglo-Chinese School Sports Hall",
                             UpdatedBy = "System",
                             capacity = 900
@@ -699,12 +708,73 @@ namespace SportsVenueBooking.Migrations
                             Id = 19,
                             Address = "40 Nanyang Walk, Singapore 639798",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6192),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6193),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7870),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(7871),
                             Name = "Nanyang Primary School Hall",
                             UpdatedBy = "System",
                             capacity = 500
                         });
+                });
+
+            modelBuilder.Entity("SportsVenueBooking.Domain.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CVV")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExpiryDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameOnCard")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("SportsVenueBooking.Domain.Schedule", b =>
@@ -736,9 +806,6 @@ namespace SportsVenueBooking.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("totalPrice")
-                        .HasColumnType("float");
-
                     b.HasKey("Id");
 
                     b.HasIndex("SportLocationTimeslotId");
@@ -751,60 +818,55 @@ namespace SportsVenueBooking.Migrations
                             Id = 1,
                             AvailableSlots = 20,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7762),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7763),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8779),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8779),
                             ScheduledDate = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SportLocationTimeslotId = 1,
-                            UpdatedBy = "System",
-                            totalPrice = 0.0
+                            UpdatedBy = "System"
                         },
                         new
                         {
                             Id = 2,
                             AvailableSlots = 15,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7772),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7773),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8786),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8786),
                             ScheduledDate = new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SportLocationTimeslotId = 2,
-                            UpdatedBy = "System",
-                            totalPrice = 0.0
+                            UpdatedBy = "System"
                         },
                         new
                         {
                             Id = 3,
                             AvailableSlots = 25,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7776),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7777),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8788),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8789),
                             ScheduledDate = new DateTime(2025, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SportLocationTimeslotId = 3,
-                            UpdatedBy = "System",
-                            totalPrice = 0.0
+                            UpdatedBy = "System"
                         },
                         new
                         {
                             Id = 4,
                             AvailableSlots = 10,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7780),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7782),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8790),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8791),
                             ScheduledDate = new DateTime(2025, 1, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SportLocationTimeslotId = 4,
-                            UpdatedBy = "System",
-                            totalPrice = 0.0
+                            UpdatedBy = "System"
                         },
                         new
                         {
                             Id = 5,
                             AvailableSlots = 20,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7785),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7786),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8793),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8794),
                             ScheduledDate = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SportLocationTimeslotId = 6,
-                            UpdatedBy = "System",
-                            totalPrice = 0.0
+                            UpdatedBy = "System"
                         });
                 });
 
@@ -847,8 +909,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6821),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6823),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8155),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8155),
                             ImagePath = "images/badminton.png",
                             Name = "Badminton",
                             UpdatedBy = "System"
@@ -857,8 +919,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 2,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6827),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6828),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8157),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8158),
                             ImagePath = "images/basketball.png",
                             Name = "Basketball",
                             UpdatedBy = "System"
@@ -867,8 +929,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 3,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6831),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6832),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8160),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8160),
                             ImagePath = "images/beach_volleyball.png",
                             Name = "Beach Volleyball",
                             UpdatedBy = "System"
@@ -877,8 +939,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 4,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6835),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6836),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8162),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8163),
                             ImagePath = "images/volleyball.png",
                             Name = "Volleyball",
                             UpdatedBy = "System"
@@ -887,8 +949,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 5,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6839),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6840),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8164),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8165),
                             ImagePath = "images/dance.png",
                             Name = "Dance",
                             UpdatedBy = "System"
@@ -897,8 +959,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 6,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6843),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6844),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8166),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8167),
                             ImagePath = "images/floorball logo.jpg",
                             Name = "Floorball",
                             UpdatedBy = "System"
@@ -907,8 +969,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 7,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6847),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6848),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8169),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8169),
                             ImagePath = "images/frisbee logo.png",
                             Name = "Frisbee",
                             UpdatedBy = "System"
@@ -917,8 +979,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 8,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6851),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6852),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8171),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8171),
                             ImagePath = "images/handball.jpg",
                             Name = "Handball",
                             UpdatedBy = "System"
@@ -927,8 +989,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 9,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6855),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6856),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8173),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8174),
                             ImagePath = "images/lawnbowl.png",
                             Name = "Lawn Bowl",
                             UpdatedBy = "System"
@@ -937,8 +999,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 10,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6859),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6860),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8175),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8176),
                             ImagePath = "images/netball.jpg",
                             Name = "Netball",
                             UpdatedBy = "System"
@@ -947,8 +1009,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 11,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6863),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6864),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8177),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8178),
                             ImagePath = "images/petanque.jpg",
                             Name = "Petanque",
                             UpdatedBy = "System"
@@ -957,8 +1019,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 12,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6867),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6868),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8180),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8180),
                             ImagePath = "images/pickleball.jpg",
                             Name = "Pickleball",
                             UpdatedBy = "System"
@@ -967,8 +1029,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 13,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6871),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6872),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8182),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8183),
                             ImagePath = "images/sepak.png",
                             Name = "Sepak",
                             UpdatedBy = "System"
@@ -977,8 +1039,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 14,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6930),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6931),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8184),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8185),
                             ImagePath = "images/squash.png",
                             Name = "Squash",
                             UpdatedBy = "System"
@@ -987,8 +1049,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 15,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6934),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6935),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8186),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8187),
                             ImagePath = "images/table_tennis.png",
                             Name = "Table Tennis",
                             UpdatedBy = "System"
@@ -997,8 +1059,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 16,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6938),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6939),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8189),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8189),
                             ImagePath = "images/soccer.png",
                             Name = "Soccer",
                             UpdatedBy = "System"
@@ -1007,8 +1069,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 17,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6942),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6943),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8191),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8191),
                             ImagePath = "images/hockey.png",
                             Name = "Hockey",
                             UpdatedBy = "System"
@@ -1017,8 +1079,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 18,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6946),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(6947),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8193),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8194),
                             ImagePath = "images/tennis.png",
                             Name = "Tennis",
                             UpdatedBy = "System"
@@ -1064,8 +1126,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7193),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7194),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8336),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8337),
                             LocationId = 2,
                             SportId = 1,
                             UpdatedBy = "System"
@@ -1074,8 +1136,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 2,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7197),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7198),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8338),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8339),
                             LocationId = 1,
                             SportId = 1,
                             UpdatedBy = "System"
@@ -1084,8 +1146,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 3,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7201),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7202),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8341),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8341),
                             LocationId = 2,
                             SportId = 2,
                             UpdatedBy = "System"
@@ -1094,8 +1156,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 4,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7205),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7206),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8343),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8343),
                             LocationId = 14,
                             SportId = 2,
                             UpdatedBy = "System"
@@ -1104,8 +1166,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 5,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7209),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7210),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8345),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8346),
                             LocationId = 1,
                             SportId = 3,
                             UpdatedBy = "System"
@@ -1114,8 +1176,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 6,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7213),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7214),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8347),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8348),
                             LocationId = 17,
                             SportId = 3,
                             UpdatedBy = "System"
@@ -1124,8 +1186,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 7,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7217),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7218),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8349),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8350),
                             LocationId = 2,
                             SportId = 4,
                             UpdatedBy = "System"
@@ -1134,8 +1196,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 8,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7221),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7222),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8352),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8352),
                             LocationId = 15,
                             SportId = 4,
                             UpdatedBy = "System"
@@ -1144,8 +1206,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 9,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7225),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7226),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8354),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8354),
                             LocationId = 1,
                             SportId = 5,
                             UpdatedBy = "System"
@@ -1154,8 +1216,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 10,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7229),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7230),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8357),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8357),
                             LocationId = 16,
                             SportId = 5,
                             UpdatedBy = "System"
@@ -1164,8 +1226,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 11,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7232),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7234),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8359),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8359),
                             LocationId = 3,
                             SportId = 6,
                             UpdatedBy = "System"
@@ -1174,8 +1236,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 12,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7236),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7237),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8361),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8362),
                             LocationId = 18,
                             SportId = 6,
                             UpdatedBy = "System"
@@ -1184,8 +1246,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 13,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7240),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7241),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8363),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8364),
                             LocationId = 4,
                             SportId = 7,
                             UpdatedBy = "System"
@@ -1194,8 +1256,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 14,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7244),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7245),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8365),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8366),
                             LocationId = 5,
                             SportId = 8,
                             UpdatedBy = "System"
@@ -1204,8 +1266,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 15,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7248),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7249),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8368),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8368),
                             LocationId = 6,
                             SportId = 9,
                             UpdatedBy = "System"
@@ -1214,8 +1276,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 16,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7252),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7253),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8370),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8370),
                             LocationId = 19,
                             SportId = 9,
                             UpdatedBy = "System"
@@ -1224,8 +1286,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 17,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7256),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7257),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8372),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8373),
                             LocationId = 7,
                             SportId = 10,
                             UpdatedBy = "System"
@@ -1234,8 +1296,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 18,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7260),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7261),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8374),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8375),
                             LocationId = 8,
                             SportId = 11,
                             UpdatedBy = "System"
@@ -1244,8 +1306,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 19,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7264),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7265),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8376),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8377),
                             LocationId = 9,
                             SportId = 12,
                             UpdatedBy = "System"
@@ -1254,8 +1316,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 20,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7268),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7269),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8378),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8379),
                             LocationId = 2,
                             SportId = 12,
                             UpdatedBy = "System"
@@ -1264,8 +1326,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 21,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7272),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7273),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8381),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8381),
                             LocationId = 10,
                             SportId = 13,
                             UpdatedBy = "System"
@@ -1274,8 +1336,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 22,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7275),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7277),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8383),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8383),
                             LocationId = 11,
                             SportId = 14,
                             UpdatedBy = "System"
@@ -1284,8 +1346,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 23,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7279),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7281),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8472),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8473),
                             LocationId = 12,
                             SportId = 15,
                             UpdatedBy = "System"
@@ -1294,8 +1356,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 24,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7283),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7284),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8475),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8475),
                             LocationId = 13,
                             SportId = 16,
                             UpdatedBy = "System"
@@ -1304,8 +1366,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 25,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7287),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7288),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8477),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8478),
                             LocationId = 14,
                             SportId = 17,
                             UpdatedBy = "System"
@@ -1439,8 +1501,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7518),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7520),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8626),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8627),
                             Description = "08:00 AM - 09:00 AM",
                             UpdatedBy = "System"
                         },
@@ -1448,8 +1510,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 2,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7522),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7523),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8628),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8629),
                             Description = "09:00 AM - 10:00 AM",
                             UpdatedBy = "System"
                         },
@@ -1457,8 +1519,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 3,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7526),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7527),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8630),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8631),
                             Description = "10:00 AM - 11:00 AM",
                             UpdatedBy = "System"
                         },
@@ -1466,8 +1528,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 4,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7530),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7531),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8632),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8633),
                             Description = "11:00 AM - 12:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1475,8 +1537,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 5,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7533),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7534),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8634),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8635),
                             Description = "12:00 PM - 01:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1484,8 +1546,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 6,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7537),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7538),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8637),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8637),
                             Description = "01:00 PM - 02:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1493,8 +1555,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 7,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7541),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7542),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8639),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8639),
                             Description = "02:00 PM - 03:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1502,8 +1564,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 8,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7544),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7545),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8641),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8641),
                             Description = "03:00 PM - 04:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1511,8 +1573,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 9,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7548),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7549),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8643),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8644),
                             Description = "04:00 PM - 05:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1520,8 +1582,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 10,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7552),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7553),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8645),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8646),
                             Description = "05:00 PM - 06:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1529,8 +1591,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 11,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7555),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7556),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8647),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8648),
                             Description = "06:00 PM - 07:00 PM",
                             UpdatedBy = "System"
                         },
@@ -1538,8 +1600,8 @@ namespace SportsVenueBooking.Migrations
                         {
                             Id = 12,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7559),
-                            DateUpdated = new DateTime(2025, 1, 22, 9, 43, 31, 2, DateTimeKind.Local).AddTicks(7560),
+                            DateCreated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8649),
+                            DateUpdated = new DateTime(2025, 2, 4, 18, 22, 29, 410, DateTimeKind.Local).AddTicks(8650),
                             Description = "07:00 PM - 08:00 PM",
                             UpdatedBy = "System"
                         });
@@ -1596,17 +1658,6 @@ namespace SportsVenueBooking.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Payment", b =>
-                {
-                    b.HasOne("SportsVenueBooking.Domain.Bookings", "Booking")
-                        .WithOne("Payment")
-                        .HasForeignKey("Payment", "BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-                });
-
             modelBuilder.Entity("SportsVenueBooking.Domain.Bookings", b =>
                 {
                     b.HasOne("SportsVenueBooking.Domain.Customer", "Customer")
@@ -1615,17 +1666,13 @@ namespace SportsVenueBooking.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SportsVenueBooking.Domain.Location", "Location")
+                    b.HasOne("SportsVenueBooking.Domain.SportLocation", "SportLocation")
                         .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SportLocationId");
 
-                    b.HasOne("SportsVenueBooking.Domain.Sport", "Sport")
+                    b.HasOne("SportsVenueBooking.Domain.SportLocationTimeslot", "SportLocationTimeslot")
                         .WithMany()
-                        .HasForeignKey("SportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SportLocationTimeslotId");
 
                     b.HasOne("SportsVenueBooking.Data.SportsVenueBookingUser", "User")
                         .WithMany()
@@ -1633,11 +1680,22 @@ namespace SportsVenueBooking.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Location");
+                    b.Navigation("SportLocation");
 
-                    b.Navigation("Sport");
+                    b.Navigation("SportLocationTimeslot");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SportsVenueBooking.Domain.Payment", b =>
+                {
+                    b.HasOne("SportsVenueBooking.Domain.Bookings", "Booking")
+                        .WithOne("Payment")
+                        .HasForeignKey("SportsVenueBooking.Domain.Payment", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
                 });
 
             modelBuilder.Entity("SportsVenueBooking.Domain.Schedule", b =>
