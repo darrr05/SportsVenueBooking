@@ -47,7 +47,7 @@ else
                     <InputDate id="datecreated" @bind-Value="ContactUs.DateCreated" class="form-control" />
                     <ValidationMessage For="() => ContactUs.DateCreated" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="dateupdated" class="form-label">DateUpdated:</label>
                     <InputDate id="dateupdated" @bind-Value="ContactUs.DateUpdated" class="form-control" />
                     <ValidationMessage For="() => ContactUs.DateUpdated" class="text-danger" />
@@ -57,7 +57,7 @@ else
                     <InputText id="createdby" @bind-Value="ContactUs.CreatedBy" class="form-control" />
                     <ValidationMessage For="() => ContactUs.CreatedBy" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="updatedby" class="form-label">UpdatedBy:</label>
                     <InputText id="updatedby" @bind-Value="ContactUs.UpdatedBy" class="form-control" />
                     <ValidationMessage For="() => ContactUs.UpdatedBy" class="text-danger" />
@@ -79,6 +79,11 @@ else
     [SupplyParameterFromForm]
     private ContactUs? ContactUs { get; set; }
 
+    //Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    //Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -95,6 +100,12 @@ else
     private async Task UpdateContactUs()
     {
         using var context = DbFactory.CreateDbContext();
+
+        //Set the userId to the UpdatedBy fields.
+        ContactUs.UpdatedBy = userId;
+        //Set the DateUpdated fields to the current date and time.
+        ContactUs.DateUpdated = DateTime.Now;
+
         context.Attach(ContactUs!).State = EntityState.Modified;
 
         try

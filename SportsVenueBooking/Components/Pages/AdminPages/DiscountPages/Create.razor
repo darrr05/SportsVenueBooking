@@ -50,22 +50,22 @@
                 <InputDate id="expirationdate" @bind-Value="Discount.ExpirationDate" class="form-control" /> 
                 <ValidationMessage For="() => Discount.ExpirationDate" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+            <div class="mb-3" hidden>
                 <label for="datecreated" class="form-label">DateCreated:</label> 
                 <InputDate id="datecreated" @bind-Value="Discount.DateCreated" class="form-control" /> 
                 <ValidationMessage For="() => Discount.DateCreated" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+            <div class="mb-3" hidden>
                 <label for="dateupdated" class="form-label">DateUpdated:</label> 
                 <InputDate id="dateupdated" @bind-Value="Discount.DateUpdated" class="form-control" /> 
                 <ValidationMessage For="() => Discount.DateUpdated" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+            <div class="mb-3" hidden>
                 <label for="createdby" class="form-label">CreatedBy:</label> 
                 <InputText id="createdby" @bind-Value="Discount.CreatedBy" class="form-control" /> 
                 <ValidationMessage For="() => Discount.CreatedBy" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+            <div class="mb-3" hidden>
                 <label for="updatedby" class="form-label">UpdatedBy:</label> 
                 <InputText id="updatedby" @bind-Value="Discount.UpdatedBy" class="form-control" /> 
                 <ValidationMessage For="() => Discount.UpdatedBy" class="text-danger" /> 
@@ -83,10 +83,36 @@
     [SupplyParameterFromForm]
     private Discount Discount { get; set; } = new();
 
+    // Create userId string to store the user id, default value is "System".
+    private string userId = "System";
+    // Inject the AuthenticationStateProvider to get the user id.
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    // Override the OnInitialized method to get the user id.
+    protected override async void OnInitialized()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        // Get the userId claim
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+    }
+
+
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddDiscount()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Set metadata for the booking
+        Discount.CreatedBy = userId;
+        Discount.UpdatedBy = userId;
+        Discount.DateCreated = DateTime.Now;
+        Discount.DateUpdated = DateTime.Now;
+
         context.Discounts.Add(Discount);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/discounts");

@@ -14,72 +14,81 @@
     <div class="col-md-4">
         <EditForm method="post" Model="Payment" OnValidSubmit="AddPayment" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- BookingId Dropdown -->
             <div class="mb-3">
-                <label for="bookingid" class="form-label">BookingId:</label> 
-                <InputNumber id="bookingid" @bind-Value="Payment.BookingId" class="form-control" /> 
-                <ValidationMessage For="() => Payment.BookingId" class="text-danger" /> 
-            </div>        
+                <label for="bookingid" class="form-label">BookingId:</label>
+                <InputSelect id="bookingid" @bind-Value="Payment.BookingId" class="form-control">
+                    <option value="">Select a booking</option>
+                    @foreach (var booking in bookings)
+                    {
+                        <option value="@booking.Id">@booking.Id</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Payment.BookingId" class="text-danger" />
+            </div>
+
             <div class="mb-3">
-                <label for="amount" class="form-label">Amount:</label> 
-                <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" /> 
-                <ValidationMessage For="() => Payment.Amount" class="text-danger" /> 
-            </div>        
+                <label for="amount" class="form-label">Amount:</label>
+                <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" />
+                <ValidationMessage For="() => Payment.Amount" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="paymentmethod" class="form-label">PaymentMethod:</label> 
-                <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" /> 
-                <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" /> 
-            </div>        
+                <label for="paymentmethod" class="form-label">PaymentMethod:</label>
+                <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" />
+                <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="paymentdate" class="form-label">PaymentDate:</label> 
-                <InputDate id="paymentdate" @bind-Value="Payment.PaymentDate" class="form-control" /> 
-                <ValidationMessage For="() => Payment.PaymentDate" class="text-danger" /> 
-            </div>        
+                <label for="paymentdate" class="form-label">PaymentDate:</label>
+                <InputDate id="paymentdate" @bind-Value="Payment.PaymentDate" class="form-control" />
+                <ValidationMessage For="() => Payment.PaymentDate" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="Payment.Status" class="form-control" /> 
-                <ValidationMessage For="() => Payment.Status" class="text-danger" /> 
-            </div>        
+                <label for="status" class="form-label">Status:</label>
+                <InputText id="status" @bind-Value="Payment.Status" class="form-control" />
+                <ValidationMessage For="() => Payment.Status" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="nameoncard" class="form-label">NameOnCard:</label> 
-                <InputText id="nameoncard" @bind-Value="Payment.NameOnCard" class="form-control" /> 
-                <ValidationMessage For="() => Payment.NameOnCard" class="text-danger" /> 
-            </div>        
+                <label for="nameoncard" class="form-label">NameOnCard:</label>
+                <InputText id="nameoncard" @bind-Value="Payment.NameOnCard" class="form-control" />
+                <ValidationMessage For="() => Payment.NameOnCard" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="cardnumber" class="form-label">CardNumber:</label> 
-                <InputText id="cardnumber" @bind-Value="Payment.CardNumber" class="form-control" /> 
-                <ValidationMessage For="() => Payment.CardNumber" class="text-danger" /> 
-            </div>        
+                <label for="cardnumber" class="form-label">CardNumber:</label>
+                <InputText id="cardnumber" @bind-Value="Payment.CardNumber" class="form-control" />
+                <ValidationMessage For="() => Payment.CardNumber" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="expirydate" class="form-label">ExpiryDate:</label> 
-                <InputText id="expirydate" @bind-Value="Payment.ExpiryDate" class="form-control" /> 
-                <ValidationMessage For="() => Payment.ExpiryDate" class="text-danger" /> 
-            </div>        
+                <label for="expirydate" class="form-label">ExpiryDate:</label>
+                <InputText id="expirydate" @bind-Value="Payment.ExpiryDate" class="form-control" />
+                <ValidationMessage For="() => Payment.ExpiryDate" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="cvv" class="form-label">CVV:</label> 
-                <InputText id="cvv" @bind-Value="Payment.CVV" class="form-control" /> 
-                <ValidationMessage For="() => Payment.CVV" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="datecreated" class="form-label">DateCreated:</label> 
-                <InputDate id="datecreated" @bind-Value="Payment.DateCreated" class="form-control" /> 
-                <ValidationMessage For="() => Payment.DateCreated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="dateupdated" class="form-label">DateUpdated:</label> 
-                <InputDate id="dateupdated" @bind-Value="Payment.DateUpdated" class="form-control" /> 
-                <ValidationMessage For="() => Payment.DateUpdated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="createdby" class="form-label">CreatedBy:</label> 
-                <InputText id="createdby" @bind-Value="Payment.CreatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Payment.CreatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="updatedby" class="form-label">UpdatedBy:</label> 
-                <InputText id="updatedby" @bind-Value="Payment.UpdatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Payment.UpdatedBy" class="text-danger" /> 
-            </div>        
+                <label for="cvv" class="form-label">CVV:</label>
+                <InputText id="cvv" @bind-Value="Payment.CVV" class="form-control" />
+                <ValidationMessage For="() => Payment.CVV" class="text-danger" />
+            </div>
+            <div class="mb-3" hidden>
+                <label for="datecreated" class="form-label">DateCreated:</label>
+                <InputDate id="datecreated" @bind-Value="Payment.DateCreated" class="form-control" />
+                <ValidationMessage For="() => Payment.DateCreated" class="text-danger" />
+            </div>
+            <div class="mb-3" hidden>
+                <label for="dateupdated" class="form-label">DateUpdated:</label>
+                <InputDate id="dateupdated" @bind-Value="Payment.DateUpdated" class="form-control" />
+                <ValidationMessage For="() => Payment.DateUpdated" class="text-danger" />
+            </div>
+            <div class="mb-3" hidden>
+                <label for="createdby" class="form-label">CreatedBy:</label>
+                <InputText id="createdby" @bind-Value="Payment.CreatedBy" class="form-control" />
+                <ValidationMessage For="() => Payment.CreatedBy" class="text-danger" />
+            </div>
+            <div class="mb-3" hidden>
+                <label for="updatedby" class="form-label">UpdatedBy:</label>
+                <InputText id="updatedby" @bind-Value="Payment.UpdatedBy" class="form-control" />
+                <ValidationMessage For="() => Payment.UpdatedBy" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -89,14 +98,61 @@
     <a href="/payments">Back to List</a>
 </div>
 
+@if (showAlert)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Warning!</strong> This BookingId is already associated with a payment.
+    </div>
+}
+
 @code {
     [SupplyParameterFromForm]
     private Payment Payment { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private List<Bookings> bookings = new();
+    private bool showAlert = false; // Flag to show alert
+
+    private string userId = "System";
+
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userIdClaim = user.FindFirst("userId");
+        if (userIdClaim != null)
+        {
+            userId = userIdClaim.Value;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+        bookings = await context.Bookings.ToListAsync(); // Retrieve all bookings
+    }
+
     private async Task AddPayment()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Check if the booking already exists in the Payment table
+        var existingPayment = await context.Payment
+            .FirstOrDefaultAsync(p => p.BookingId == Payment.BookingId);
+
+        if (existingPayment != null)
+        {
+            // If BookingId already exists, show alert and do not proceed
+            showAlert = true;
+            return;
+        }
+
+        // Proceed with adding payment
+        Payment.CreatedBy = userId;
+        Payment.UpdatedBy = userId;
+        Payment.DateCreated = DateTime.Now;
+        Payment.DateUpdated = DateTime.Now;
+
         context.Payment.Add(Payment);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/payments");

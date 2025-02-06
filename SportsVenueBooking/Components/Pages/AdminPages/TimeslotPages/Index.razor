@@ -5,6 +5,7 @@
 @using SportsVenueBooking.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
@@ -14,7 +15,7 @@
     <a href="timeslots/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Timeslot">
+<QuickGrid Class="table" Items="context.Timeslot" Pagination="paginationState">
     <PropertyColumn Property="timeslot => timeslot.Description" />
     <PropertyColumn Property="timeslot => timeslot.DateCreated" />
     <PropertyColumn Property="timeslot => timeslot.DateUpdated" />
@@ -27,9 +28,11 @@
         <a href="@($"timeslots/delete?id={timeslot.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
+<Paginator State="paginationState" />
 
 @code {
     private SportsVenueBookingContext context = default!;
+    PaginationState paginationState = new PaginationState { ItemsPerPage = 1 };
 
     protected override void OnInitialized()
     {

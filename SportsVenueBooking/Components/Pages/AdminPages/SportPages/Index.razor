@@ -14,7 +14,7 @@
     <a href="sports/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Sport">
+<QuickGrid Class="table" Items="context.Sport" Pagination="paginationState">
     <PropertyColumn Property="sport => sport.Name" />
     <PropertyColumn Property="sport => sport.ImagePath" />
     <PropertyColumn Property="sport => sport.DateCreated" />
@@ -28,9 +28,12 @@
         <a href="@($"sports/delete?id={sport.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
+<Paginator State="paginationState" />
 
 @code {
     private SportsVenueBookingContext context = default!;
+
+    PaginationState paginationState = new PaginationState { ItemsPerPage = 1 };
 
     protected override void OnInitialized()
     {

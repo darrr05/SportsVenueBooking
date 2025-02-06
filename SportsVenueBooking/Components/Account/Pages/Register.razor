@@ -39,6 +39,8 @@
             <h2>Create a new account.</h2>
             <hr />
             <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- Form Fields for Registration -->
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label for="email">Email</label>
@@ -46,49 +48,47 @@
             </div>
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.FirstName" class="form-control"
-                           autocomplete="firstname" aria-required="true" placeholder="Bill" />
+                <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="firstname" aria-required="true" placeholder="Bill" />
                 <label for="firstname">First Name</label>
                 <ValidationMessage For="() => Input.FirstName" class="text-danger" />
             </div>
+
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.LastName" class="form-control"
-                           autocomplete="lastname" aria-required="true" placeholder="Gates" />
+                <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="lastname" aria-required="true" placeholder="Gates" />
                 <label for="lastname">Last Name</label>
                 <ValidationMessage For="() => Input.LastName" class="text-danger" />
             </div>
+
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control"
-                           autocomplete="tel" aria-required="true" placeholder="12345678" />
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="12345678" />
                 <label for="phoneNumber">Phone Number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputNumber @bind-Value="Input.Age" class="form-control"
-                             aria-required="true" placeholder="25" />
+                <InputNumber @bind-Value="Input.Age" class="form-control" aria-required="true" placeholder="25" />
                 <label for="age">Age</label>
                 <ValidationMessage For="() => Input.Age" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Address" class="form-control"
-                           aria-required="true" placeholder="123 Main Street" />
+                <InputText @bind-Value="Input.Address" class="form-control" aria-required="true" placeholder="123 Main Street" />
                 <label for="address">Address</label>
                 <ValidationMessage For="() => Input.Address" class="text-danger" />
             </div>
-
 
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label for="password">Password</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
+
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
 
@@ -172,6 +172,8 @@
         await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId", user.Id));
 
         Logger.LogInformation("User created a new account with password.");
+
+        // Generate email confirmation token and URL
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -179,17 +181,11 @@
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
+        // Send email confirmation link
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
-
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        // Redirect user to confirmation page
+        RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
     }
 
     private SportsVenueBookingUser CreateUser()

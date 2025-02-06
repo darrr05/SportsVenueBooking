@@ -4,33 +4,39 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using SportsVenueBooking.Data
+@using Microsoft.AspNetCore.Http
 
 @inject UserManager<SportsVenueBookingUser> UserManager
 @inject IEmailSender<SportsVenueBookingUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register confirmation</PageTitle>
+<PageTitle>Register Confirmation</PageTitle>
 
-<h1>Register confirmation</h1>
+<h1>Register Confirmation</h1>
 
 <StatusMessage Message="@statusMessage" />
 
-@if (emailConfirmationLink is not null)
+@if (isEmailConfirmed.HasValue)
 {
-    <p>
-        This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-        Normally this would be emailed: <a href="@emailConfirmationLink">Click here to confirm your account</a>
-    </p>
+    if (isEmailConfirmed == true)
+    {
+        <p>Your email has been successfully confirmed. You can now log in!</p>
+    }
+    else
+    {
+        <p>We were unable to confirm your email. Please check your inbox and click the confirmation link. If you did not receive the email, you can request a new one.</p>
+        <button @onclick="SendConfirmationEmail" class="btn btn-primary">Resend Confirmation Email</button>
+    }
 }
 else
 {
-    <p>Please check your email to confirm your account.</p>
+    <p>Checking email confirmation status...</p>
 }
 
 @code {
-    private string? emailConfirmationLink;
     private string? statusMessage;
+    private bool? isEmailConfirmed = null; // To track email confirmation status
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -43,37 +49,61 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (Email is null)
+        if (string.IsNullOrEmpty(Email))
         {
-            RedirectManager.RedirectTo("");
+            statusMessage = "Email parameter is missing.";
+            return;
         }
 
         var user = await UserManager.FindByEmailAsync(Email);
-        if (user is null)
+
+        if (user == null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = "Error finding user for unspecified email";
+            statusMessage = "User not found.";
+            return;
+        }
+
+        // Check if the user's email is already confirmed
+        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
+
+        if (isEmailConfirmed == true)
+        {
+            statusMessage = "Your email has already been confirmed. You can now log in.";
         }
         else
         {
-            // Generate email confirmation token and link
-            var userId = await UserManager.GetUserIdAsync(user);
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            emailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            // Email is not confirmed, generate the confirmation link
+            statusMessage = "A confirmation email has been sent to your email address. Please check your inbox to confirm your account.";
+        }
+    }
 
-            // Send the confirmation email
-            try
-            {
-                await EmailSender.SendConfirmationLinkAsync(user, Email, emailConfirmationLink);
-                statusMessage = "A confirmation email has been sent to your email address.";
-            }
-            catch (Exception ex)
-            {
-                statusMessage = $"Error sending email: {ex.Message}";
-            }
+    private async Task SendConfirmationEmail()
+    {
+        var user = await UserManager.FindByEmailAsync(Email);
+        if (user == null)
+        {
+            statusMessage = "User not found.";
+            return;
+        }
+
+        // Generate email confirmation token and link
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            new Dictionary<string, object?> { ["userId"] = user.Id, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
+        try
+        {
+            // Send the confirmation email again
+            await EmailSender.SendConfirmationLinkAsync(user, Email, callbackUrl);
+            statusMessage = "A new confirmation email has been sent to your email address.";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error sending confirmation email: {ex.Message}";
         }
     }
 }

@@ -1,14 +1,18 @@
 ﻿@page "/customers/delete"
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using SportsVenueBooking.Data
 @using SportsVenueBooking.Domain
 @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject UserManager<SportsVenueBookingUser> UserManager
 @inject NavigationManager NavigationManager
 
 <PageTitle>Delete</PageTitle>
 
 <h1>Delete</h1>
 
-<p>Are you sure you want to delete this?</p>
+<p>Are you sure you want to delete this customer and their associated user account?</p>
+
 <div>
     <h2>Customer</h2>
     <hr />
@@ -16,7 +20,8 @@
     {
         <p><em>Loading...</em></p>
     }
-    else {
+    else
+    {
         <dl class="row">
             <dt class="col-sm-2">FirstName</dt>
             <dd class="col-sm-10">@customer.FirstName</dd>
@@ -84,8 +89,28 @@
     private async Task DeleteCustomer()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Find the user by email that matches the customer's email
+        var user = await UserManager.FindByEmailAsync(customer?.Email);
+
+        if (user != null)
+        {
+            // Delete the user
+            var result = await UserManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                // Handle error deleting user
+                NavigationManager.NavigateTo("error"); // redirect to an error page or display message
+                return;
+            }
+        }
+
+        // Delete the customer from the database
         context.Customer.Remove(customer!);
         await context.SaveChangesAsync();
+
+        // Redirect to the customer list page after deletion
         NavigationManager.NavigateTo("/customers");
     }
 }

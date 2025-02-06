@@ -5,6 +5,7 @@
 @using SportsVenueBooking.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
@@ -14,9 +15,22 @@
     <a href="sportlocationtimeslots/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.SportLocationTimeslots">
-    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.SportLocationId" />
-    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.TimeslotId" />
+<QuickGrid Class="table" Items="context.SportLocationTimeslots" Pagination="paginationState">
+    @* <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.SportLocationId" />
+    <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.TimeslotId" /> *@
+
+    <TemplateColumn Context="SportLocationTimeslot" Title="Sport">
+        @GetSportString(SportLocationTimeslot.SportLocationId)
+    </TemplateColumn>
+
+    <TemplateColumn Context="SportLocationTimeslot" Title="Location">
+        @GetLocationString(SportLocationTimeslot.SportLocationId)
+    </TemplateColumn>
+
+    <TemplateColumn Context="SportLocationTimeslot" Title="Timeslot">
+        @GetTimeslotString(SportLocationTimeslot.TimeslotId)
+    </TemplateColumn>
+
     <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.Price" />
     <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.DateCreated" />
     <PropertyColumn Property="sportlocationtimeslot => sportlocationtimeslot.DateUpdated" />
@@ -29,13 +43,57 @@
         <a href="@($"sportlocationtimeslots/delete?id={sportlocationtimeslot.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
+<Paginator State="paginationState" />
 
 @code {
     private SportsVenueBookingContext context = default!;
+    private IList<SportLocation> SportLocations;
+    private IList<Timeslot> Timeslots;
+    private IList<Sport> Sports;
+    private IList<Location> Locations;
+    private Dictionary<int, Sport> SportsDict = new Dictionary<int, Sport>();
+    private Dictionary<int, Location> LocationsDict = new Dictionary<int, Location>();
+    private Dictionary<int, Timeslot> TimeslotsDict = new Dictionary<int, Timeslot>();
+    PaginationState paginationState = new PaginationState { ItemsPerPage = 1 };
+
+    // GetSportString method to get the sport string
+    private string GetSportString(int SportLocationId)
+    {
+        var sport = Sports.FirstOrDefault(s => s.Id == SportLocationId);
+        return sport == null ?
+        string.Empty : $"{sport.Name}";
+    }
+
+    // GetLocationString method to get the location string
+    private string GetLocationString(int SportLocationId)
+    {
+        var location = Locations.FirstOrDefault(l => l.Id == SportLocationId);
+        return location == null ?
+        string.Empty : $"{location.Name}";
+    }
+
+    // Get Timeslot String method to get the timeslot string
+    private string GetTimeslotString(int timeslotId)
+    {
+        var timeslot = Timeslots.FirstOrDefault(t => t.Id == timeslotId);
+        return timeslot == null ?
+        string.Empty : $"{timeslot.Description}";
+    }
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+
+        // Fetch and initialize Sports, Locations, and SportLocations collections
+        Sports = context.Sport.ToList();
+        Locations = context.Location.ToList();
+        SportLocations = context.SportLocation.ToList();  // You need this to link SportLocationId
+        Timeslots = context.Timeslot.ToList();
+
+        // Populate dictionaries for faster lookups
+        SportsDict = Sports.ToDictionary(s => s.Id);
+        LocationsDict = Locations.ToDictionary(l => l.Id);
+        TimeslotsDict = Timeslots.ToDictionary(t => t.Id);
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

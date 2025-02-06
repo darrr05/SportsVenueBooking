@@ -20,13 +20,24 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="Payment" OnValidSubmit="UpdatePayment" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
                 <input type="hidden" name="Payment.Id" value="@Payment.Id" />
+
+                <!-- BookingId Dropdown -->
                 <div class="mb-3">
                     <label for="bookingid" class="form-label">BookingId:</label>
-                    <InputNumber id="bookingid" @bind-Value="Payment.BookingId" class="form-control" />
+                    <InputSelect id="bookingid" @bind-Value="Payment.BookingId" class="form-control">
+                        <option value="">Select a booking</option>
+                        @foreach (var booking in bookings)
+                        {
+                            <option value="@booking.Id" @(booking.Id= =Payment.BookingId ? "selected" : "" )>
+                                @booking.Id
+                            </option>
+                        }
+                    </InputSelect>
                     <ValidationMessage For="() => Payment.BookingId" class="text-danger" />
                 </div>
+
                 <div class="mb-3">
                     <label for="amount" class="form-label">Amount:</label>
                     <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" />
@@ -72,7 +83,7 @@ else
                     <InputDate id="datecreated" @bind-Value="Payment.DateCreated" class="form-control" />
                     <ValidationMessage For="() => Payment.DateCreated" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="dateupdated" class="form-label">DateUpdated:</label>
                     <InputDate id="dateupdated" @bind-Value="Payment.DateUpdated" class="form-control" />
                     <ValidationMessage For="() => Payment.DateUpdated" class="text-danger" />
@@ -82,11 +93,12 @@ else
                     <InputText id="createdby" @bind-Value="Payment.CreatedBy" class="form-control" />
                     <ValidationMessage For="() => Payment.CreatedBy" class="text-danger" />
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label for="updatedby" class="form-label">UpdatedBy:</label>
                     <InputText id="updatedby" @bind-Value="Payment.UpdatedBy" class="form-control" />
                     <ValidationMessage For="() => Payment.UpdatedBy" class="text-danger" />
                 </div>
+
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
         </div>
@@ -97,6 +109,13 @@ else
     <a href="/payments">Back to List</a>
 </div>
 
+@if (showAlert)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Warning!</strong> This BookingId is already associated with a payment.
+    </div>
+}
+
 @code {
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -104,10 +123,20 @@ else
     [SupplyParameterFromForm]
     private Payment? Payment { get; set; }
 
+    private string userId = "System";
+
+    @inject AuthenticationStateProvider authenticationStateProvider
+
+    private bool showAlert = false; // Flag for the alert
+    private List<Bookings> bookings = new();
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
         Payment ??= await context.Payment.FirstOrDefaultAsync(m => m.Id == Id);
+
+        // Fetch all bookings for the dropdown
+        bookings = await context.Bookings.ToListAsync();
 
         if (Payment is null)
         {
@@ -115,11 +144,25 @@ else
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdatePayment()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Check if the BookingId already exists in other payments (excluding the current payment)
+        var existingPayment = await context.Payment
+            .FirstOrDefaultAsync(p => p.BookingId == Payment.BookingId && p.Id != Payment.Id);
+
+        if (existingPayment != null)
+        {
+            // If BookingId already exists, show alert and do not proceed
+            showAlert = true;
+            return;
+        }
+
+        // Set the userId and DateUpdated fields for the edit
+        Payment.UpdatedBy = userId;
+        Payment.DateUpdated = DateTime.Now;
+
         context.Attach(Payment!).State = EntityState.Modified;
 
         try

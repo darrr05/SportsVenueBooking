@@ -12,10 +12,10 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Resend email confirmation</PageTitle>
+<PageTitle>Resend Email Confirmation</PageTitle>
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
+<h1>Resend Email Confirmation</h1>
+<h2>Enter your email address below to receive a confirmation email.</h2>
 <hr />
 <StatusMessage Message="@message" />
 <div class="row">
@@ -28,7 +28,7 @@
                 <label for="email" class="form-label">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend Confirmation Email</button>
         </EditForm>
     </div>
 </div>
@@ -41,28 +41,47 @@
 
     private async Task OnValidSubmitAsync()
     {
-        var user = await UserManager.FindByEmailAsync(Input.Email!);
+        // Find the user by the provided email
+        var user = await UserManager.FindByEmailAsync(Input.Email);
+
         if (user is null)
         {
-            message = "Verification email sent. Please check your email.";
+            message = "We couldn't find an account with that email address.";
             return;
         }
 
+        // Check if the email is already confirmed
+        if (await UserManager.IsEmailConfirmedAsync(user))
+        {
+            message = "Your email is already confirmed. You can log in now.";
+            return;
+        }
+
+        // Generate a new email confirmation token and URL
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        // Send the confirmation email
+        try
+        {
+            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+            message = "A new confirmation email has been sent. Please check your inbox.";
+        }
+        catch (Exception ex)
+        {
+            message = $"There was an error sending the email: {ex.Message}";
+        }
     }
 
     private sealed class InputModel
     {
         [Required]
         [EmailAddress]
+        [Display(Name = "Email Address")]
         public string Email { get; set; } = "";
     }
 }
