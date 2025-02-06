@@ -23,13 +23,16 @@
     </TemplateColumn>
     @* <PropertyColumn Property="bookings => bookings.SportLocationTimeslotId" /> *@
     <TemplateColumn Context="Bookings" Title="Sport">
-        @GetSportString(Bookings.SportLocationTimeslotId)
+        @GetSportString(Bookings.SportLocationTimeslotId1)
     </TemplateColumn>
     <TemplateColumn Context="Bookings" Title="Location">
-        @GetLocationString(Bookings.SportLocationTimeslotId)
+        @GetLocationString(Bookings.SportLocationTimeslotId1)
     </TemplateColumn>
-    <TemplateColumn Context="Bookings" Title="Timeslot">
-        @GetTimeslotString(Bookings.SportLocationTimeslotId)
+    <TemplateColumn Context="Bookings" Title="Timeslot1">
+        @GetTimeslotString(Bookings.SportLocationTimeslotId1)
+    </TemplateColumn>
+    <TemplateColumn Context="Bookings" Title="Timeslot2">
+        @GetTimeslotString(Bookings.SportLocationTimeslotId2)
     </TemplateColumn>
     <PropertyColumn Property="bookings => bookings.TotalAmount" />
     <PropertyColumn Property="bookings => bookings.BookingStatus" />

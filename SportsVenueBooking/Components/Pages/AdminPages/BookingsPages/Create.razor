@@ -15,10 +15,8 @@
         <EditForm method="post" Model="Bookings" OnValidSubmit="AddBookings" FormName="create" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
-
-            <!-- Customer Selection -->
             <div class="mb-3">
-                <label for="customerid" class="form-label">Customer:</label>
+                <label for="customerid" class="form-label">CustomerId:</label>
                 <InputSelect id="customerid" @bind-Value="Bookings.CustomerId" class="form-control">
                     <option value="">Select Customer</option>
                     @foreach (var customer in Customers)
@@ -28,15 +26,13 @@
                 </InputSelect>
                 <ValidationMessage For="() => Bookings.CustomerId" class="text-danger" />
             </div>
-
-            <!-- Sport Location Timeslot -->
             <div class="mb-3">
-                <label for="sportlocationtimeslotid" class="form-label">SportLocationTimeslotId:</label>
-                <InputSelect id="sportlocationtimeslotid" @bind-Value="Bookings.SportLocationTimeslotId" class="form-control">
+                <label for="sportlocationtimeslotid1" class="form-label">SportLocationTimeslotId1:</label>
+                <InputSelect id="sportlocationtimeslotid1" @bind-Value="Bookings.SportLocationTimeslotId1" class="form-control">
                     <option value="">-- Select Sport Location Timeslot --</option>
-                    @if (SportLocationTimeslots != null && SportLocationTimeslots.Any())
+                    @if (SportLocationTimeslots1 != null && SportLocationTimeslots1.Any())
                     {
-                        foreach (var sportlocationtimeslot in SportLocationTimeslots)
+                        foreach (var sportlocationtimeslot in SportLocationTimeslots1)
                         {
                             <option value="@sportlocationtimeslot.Id">
                                 @sportlocationtimeslot.SportLocation.Sport.Name, @sportlocationtimeslot.SportLocation.Location.Name
@@ -49,24 +45,39 @@
                         <option disabled>No available timeslots</option>
                     }
                 </InputSelect>
-                <ValidationMessage For="() => Bookings.SportLocationTimeslotId" class="text-danger" />
+                <ValidationMessage For="() => Bookings.SportLocationTimeslotId1" class="text-danger" />
             </div>
-
-            <!-- Booking Date -->
             <div class="mb-3">
+                <label for="sportlocationtimeslotid2" class="form-label">SportLocationTimeslotId2:</label>
+                <InputSelect id="sportlocationtimeslotid2" @bind-Value="Bookings.SportLocationTimeslotId2" class="form-control">
+                    <option value="0">-- Select Sport Location Timeslot --</option>
+                    @if (SportLocationTimeslots2 != null && SportLocationTimeslots2.Any())
+                    {
+                        foreach (var sportlocationtimeslot in SportLocationTimeslots2)
+                        {
+                            <option value="@sportlocationtimeslot.Id">
+                                @sportlocationtimeslot.SportLocation.Sport.Name, @sportlocationtimeslot.SportLocation.Location.Name
+                                (Timeslot: @sportlocationtimeslot.Timeslot.Description)
+                            </option>
+                        }
+                    }
+                    else
+                    {
+                        <option disabled>No available timeslots</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Bookings.SportLocationTimeslotId2" class="text-danger" />
+            </div>
+            <div class="mb-3" hidden>
                 <label for="bookingdate" class="form-label">BookingDate:</label>
                 <InputDate id="bookingdate" @bind-Value="Bookings.BookingDate" class="form-control" />
                 <ValidationMessage For="() => Bookings.BookingDate" class="text-danger" />
             </div>
-
-            <!-- Total Amount (hidden initially) -->
             <div class="mb-3" hidden>
                 <label for="totalamount" class="form-label">TotalAmount:</label>
                 <InputNumber id="totalamount" @bind-Value="Bookings.TotalAmount" class="form-control" />
                 <ValidationMessage For="() => Bookings.TotalAmount" class="text-danger" />
             </div>
-
-            <!-- Booking Status -->
             <div class="mb-3">
                 <label for="bookingstatus" class="form-label">BookingStatus:</label>
                 <InputSelect id="bookingstatus" @bind-Value="Bookings.BookingStatus" class="form-control">
@@ -77,48 +88,46 @@
                 </InputSelect>
                 <ValidationMessage For="() => Bookings.BookingStatus" class="text-danger" />
             </div>
-            <div class="mb-3">
-                <label for="cancellationreason" class="form-label">CancellationReason:</label>
-                <InputText id="cancellationreason" @bind-Value="Bookings.CancellationReason" class="form-control" />
-                <ValidationMessage For="() => Bookings.CancellationReason" class="text-danger" />
+            @* <div class="mb-3"> *@
+            @*     <label for="cancellationreason" class="form-label">CancellationReason:</label>  *@
+            @*     <InputText id="cancellationreason" @bind-Value="Bookings.CancellationReason" class="form-control" />  *@
+            @*     <ValidationMessage For="() => Bookings.CancellationReason" class="text-danger" />  *@
+            @* </div>         *@
+            @* <div class="mb-3"> *@
+            @*     <label for="cancellationdate" class="form-label">CancellationDate:</label>  *@
+            @*     <InputDate id="cancellationdate" @bind-Value="Bookings.CancellationDate" class="form-control" />  *@
+            @*     <ValidationMessage For="() => Bookings.CancellationDate" class="text-danger" />  *@
+            @* </div>         *@
+            <div class="mb-3" hidden>
+                <label for="ispaid" class="form-label">IsPaid:</label>
+                <InputCheckbox id="ispaid" @bind-Value="Bookings.IsPaid" class="form-check-input" />
+                <ValidationMessage For="() => Bookings.IsPaid" class="text-danger" />
             </div>
-            <div class="mb-3">
-                <label for="cancellationdate" class="form-label">CancellationDate:</label>
-                <InputDate id="cancellationdate" @bind-Value="Bookings.CancellationDate" class="form-control" />
-                <ValidationMessage For="() => Bookings.CancellationDate" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="paymentdate" class="form-label">PaymentDate:</label>
-                <InputDate id="paymentdate" @bind-Value="Bookings.PaymentDate" class="form-control" />
-                <ValidationMessage For="() => Bookings.PaymentDate" class="text-danger" />
-            </div>
-
-            <!-- Date Created & Updated (hidden) -->
+            @* <div class="mb-3" hidden> *@
+            @*     <label for="paymentdate" class="form-label">PaymentDate:</label>  *@
+            @*     <InputDate id="paymentdate" @bind-Value="Bookings.PaymentDate" class="form-control" />  *@
+            @*     <ValidationMessage For="() => Bookings.PaymentDate" class="text-danger" />  *@
+            @* </div>         *@
             <div class="mb-3" hidden>
                 <label for="datecreated" class="form-label">DateCreated:</label>
                 <InputDate id="datecreated" @bind-Value="Bookings.DateCreated" class="form-control" />
                 <ValidationMessage For="() => Bookings.DateCreated" class="text-danger" />
             </div>
-
             <div class="mb-3" hidden>
                 <label for="dateupdated" class="form-label">DateUpdated:</label>
                 <InputDate id="dateupdated" @bind-Value="Bookings.DateUpdated" class="form-control" />
                 <ValidationMessage For="() => Bookings.DateUpdated" class="text-danger" />
             </div>
-
-            <!-- CreatedBy & UpdatedBy (hidden) -->
             <div class="mb-3" hidden>
                 <label for="createdby" class="form-label">CreatedBy:</label>
                 <InputText id="createdby" @bind-Value="Bookings.CreatedBy" class="form-control" />
                 <ValidationMessage For="() => Bookings.CreatedBy" class="text-danger" />
             </div>
-
             <div class="mb-3" hidden>
                 <label for="updatedby" class="form-label">UpdatedBy:</label>
                 <InputText id="updatedby" @bind-Value="Bookings.UpdatedBy" class="form-control" />
                 <ValidationMessage For="() => Bookings.UpdatedBy" class="text-danger" />
             </div>
-
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -131,8 +140,54 @@
 @code {
     [SupplyParameterFromForm]
     private Bookings Bookings { get; set; } = new();
+
     private List<Customer> Customers = new();
-    private IList<SportLocationTimeslot> SportLocationTimeslots { get; set; }
+    private IList<SportLocationTimeslot> SportLocationTimeslots1 { get; set; }
+    private IList<SportLocationTimeslot> SportLocationTimeslots2 { get; set; }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddBookings()
+    {
+        if (Bookings.SportLocationTimeslotId2 == 0)
+        {
+            Bookings.SportLocationTimeslotId2 = null;
+        }
+
+        // Get the prices for both selected timeslots
+        var timeslot1 = SportLocationTimeslots1.FirstOrDefault(slt => slt.Id == Bookings.SportLocationTimeslotId1);
+        var timeslot2 = SportLocationTimeslots2.FirstOrDefault(slt => slt.Id == Bookings.SportLocationTimeslotId2);
+
+        // Calculate total amount based on both timeslots
+        if (timeslot1 != null && timeslot2 != null)
+        {
+            Bookings.TotalAmount = timeslot1.Price + timeslot2.Price;
+        }
+        else
+        {
+            Bookings.TotalAmount = timeslot1.Price;
+        }
+
+        if (Bookings.BookingStatus == "Paid")
+        {
+            Bookings.IsPaid = true;
+        }
+        else
+        {
+            Bookings.IsPaid = false;
+        }
+
+        // Set metadata for the booking
+        Bookings.BookingDate = DateTime.Now;
+        Bookings.CreatedBy = userId;
+        Bookings.UpdatedBy = userId;
+        Bookings.DateCreated = DateTime.Now;
+        Bookings.DateUpdated = DateTime.Now;
+
+        using var context = DbFactory.CreateDbContext();
+        context.Bookings.Add(Bookings);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/bookings");
+    }
 
     // Create userId string to store the user id, default value is "System".
     private string userId = "System";
@@ -152,13 +207,23 @@
         }
     }
 
+
+
     protected override async Task OnInitializedAsync()
     {
         using var context = await DbFactory.CreateDbContextAsync();
         Customers = await context.Customer.ToListAsync();
 
         // Load the sport location timeslots with necessary relationships
-        SportLocationTimeslots = await context.SportLocationTimeslots
+        SportLocationTimeslots1 = await context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation) // Ensure we include the SportLocation
+                .ThenInclude(sl => sl.Sport) // Include the Sport related entity
+            .Include(slt => slt.SportLocation) // Again include the SportLocation
+                .ThenInclude(sl => sl.Location) // Include the Location related entity
+            .Include(slt => slt.Timeslot) // Include the Timeslot entity
+            .ToListAsync();
+
+        SportLocationTimeslots2 = await context.SportLocationTimeslots
             .Include(slt => slt.SportLocation) // Ensure we include the SportLocation
                 .ThenInclude(sl => sl.Sport) // Include the Sport related entity
             .Include(slt => slt.SportLocation) // Again include the SportLocation
@@ -167,37 +232,4 @@
             .ToListAsync();
     }
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task AddBookings()
-    {
-        using var context = await DbFactory.CreateDbContextAsync();
-
-        var selectedTimeslot = SportLocationTimeslots.FirstOrDefault(slt => slt.Id == Bookings.SportLocationTimeslotId);
-        if (selectedTimeslot != null && selectedTimeslot.Price > 0)
-        {
-            Bookings.TotalAmount = selectedTimeslot.Price;
-        }
-
-        if (Bookings.BookingStatus == "Paid")
-        {
-            Bookings.IsPaid = true;
-        }
-        else
-        {
-            Bookings.IsPaid = false;
-        }
-
-        // Set metadata for the booking
-        Bookings.CreatedBy = userId;
-        Bookings.UpdatedBy = userId;
-        Bookings.DateCreated = DateTime.Now;
-        Bookings.DateUpdated = DateTime.Now;
-
-        // Save changes
-        context.Bookings.Add(Bookings);
-        await context.SaveChangesAsync();
-
-        // Redirect to the bookings page
-        NavigationManager.NavigateTo("/bookings");
-    }
 }

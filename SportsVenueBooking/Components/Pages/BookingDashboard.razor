@@ -1,13 +1,19 @@
 ﻿@page "/dashboard"
-@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using SportsVenueBooking.Data
 @using SportsVenueBooking.Domain
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@inject SportsVenueBookingContext _context
 
 <h3>Your Bookings</h3>
+
+<head>
+    <link rel="stylesheet" href="styles/BookingDashboard.css">
+</head>
 
 @if (Bookings.Any())
 {
@@ -15,11 +21,31 @@
     {
         <div class="booking-item">
             <p><strong>Booking ID:</strong> @booking.Id</p>
-            <p><strong>Sport:</strong> @booking.SportLocationTimeslot?.SportLocation?.Sport?.Name</p>
-            <p><strong>Location:</strong> @booking.SportLocationTimeslot?.SportLocation?.Location?.Name</p>
-            <p><strong>Time Slot:</strong> @booking.SportLocationTimeslot?.Timeslot?.Description</p>
+
+            @if (booking.SportLocationTimeslot1 != null)
+            {
+                <p><strong>Sport:</strong> @(booking.SportLocationTimeslot1.SportLocation?.Sport?.Name ?? "No Sport")</p>
+                <p><strong>Location:</strong> @(booking.SportLocationTimeslot1.SportLocation?.Location?.Name ?? "No Location")</p>
+                <p><strong>Time Slot 1:</strong> @(booking.SportLocationTimeslot1.Timeslot?.Description ?? "No Timeslot")</p>
+            }
+
+            @if (booking.SportLocationTimeslot2 != null)
+            {
+                <p><strong>Time Slot 2:</strong> @(booking.SportLocationTimeslot2.Timeslot?.Description ?? "No Timeslot")</p>
+            }
+
             <p><strong>Date:</strong> @booking.BookingDate.ToString("yyyy-MM-dd")</p>
             <p><strong>Status:</strong> @booking.BookingStatus</p>
+
+            @if (booking.BookingStatus == "Pending")
+            {
+                <button class="btn btn-primary" @onclick="() => GoToPayment(booking.Id)">Go to Payment</button>
+                <button class="btn btn-danger" @onclick="() => OpenCancellationModal(booking.Id)">Cancel Booking</button>
+            }
+            else if (booking.BookingStatus == "Paid")
+            {
+                <button class="btn btn-danger" @onclick="() => OpenCancellationModal(booking.Id)">Cancel Booking</button>
+            }
         </div>
     }
 }
@@ -28,53 +54,123 @@ else
     <p>No bookings found.</p>
 }
 
+<!-- Cancellation Modal -->
+@if (ShowCancellationModal)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Booking</h5>
+                    <button type="button" class="close" @onclick="CloseCancellationModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="CancellationReason">Cancellation Reason</label>
+                    <textarea id="CancellationReason" class="form-control" @bind="CancellationReason" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseCancellationModal">Close</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmCancellation">Confirm Cancellation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Bookings> Bookings { get; set; } = new();
-    [Inject] private SportsVenueBookingContext _context { get; set; }
-    [Inject] private NavigationManager NavigationManager { get; set; }
-    private string CustomerEmail { get; set; }
+    private string CancellationReason { get; set; }
+    private int BookingIdToCancel { get; set; }
+    private bool ShowCancellationModal { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
 
-        if (queryParams.TryGetValue("customerid", out var customerIdString) && int.TryParse(customerIdString, out var customerId))
+        var customerEmail = user.FindFirstValue(ClaimTypes.Email);
+        var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == customerEmail);
+
+        if (customer == null)
         {
-            await LoadBookings(customerId);
+            NavigationManager.NavigateTo("/login");
+            return;
         }
-        else
-        {
-            var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
-            if (user.Identity.IsAuthenticated)
-            {
-                CustomerEmail = user.FindFirstValue(ClaimTypes.Email);
-                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == CustomerEmail);
-                if (customer != null)
-                {
-                    await LoadBookings(customer.Id);
-                }
-                else
-                {
-                    NavigationManager.NavigateTo("/login");
-                }
-            }
-            else
-            {
-                NavigationManager.NavigateTo("/login");
-            }
-        }
+
+        await LoadBookings(customer.Id);
     }
 
     private async Task LoadBookings(int customerId)
     {
-        // Load the sport location timeslots with necessary relationships
         Bookings = await _context.Bookings
-            .Include(slt => slt.SportLocationTimeslot) // Ensure we include the SportLocation
-                .ThenInclude(sl => sl.SportLocation.Sport) // Include the Sport related entity
-            .Include(slt => slt.SportLocationTimeslot) // Again include the SportLocation
-                .ThenInclude(sl => sl.SportLocation.Location) // Include the Location related entity
-            .Include(slt => slt.SportLocationTimeslot.Timeslot) // Include the Timeslot entity
+            .Include(b => b.SportLocationTimeslot1)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Sport)
+            .Include(b => b.SportLocationTimeslot1)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Location)
+            .Include(b => b.SportLocationTimeslot1)
+                .ThenInclude(slt => slt.Timeslot)
+            .Include(b => b.SportLocationTimeslot2)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Sport)
+            .Include(b => b.SportLocationTimeslot2)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Location)
+            .Include(b => b.SportLocationTimeslot2)
+                .ThenInclude(slt => slt.Timeslot)
+            .Where(b => b.CustomerId == customerId)
             .ToListAsync();
+    }
+
+    private void OpenCancellationModal(int bookingId)
+    {
+        // Store the booking ID and open the modal
+        BookingIdToCancel = bookingId;
+        ShowCancellationModal = true;
+    }
+
+    private void CloseCancellationModal()
+    {
+        // Close the modal
+        ShowCancellationModal = false;
+        CancellationReason = string.Empty;
+    }
+
+    private async Task ConfirmCancellation()
+    {
+        if (string.IsNullOrEmpty(CancellationReason))
+        {
+            // Show a warning if no cancellation reason is provided
+            // Optionally, add a toast or error message
+            return;
+        }
+
+        var booking = await _context.Bookings.FindAsync(BookingIdToCancel);
+        if (booking != null)
+        {
+            // Set the booking status to "Cancelled" and save cancellation details
+            booking.BookingStatus = "Cancelled";
+            booking.CancellationDate = DateTime.Now;
+            booking.CancellationReason = CancellationReason;
+
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+
+            // Reload the bookings and close the modal
+            await LoadBookings(booking.CustomerId);
+            CloseCancellationModal();
+        }
+    }
+
+    private void GoToPayment(int bookingId)
+    {
+        NavigationManager.NavigateTo($"/pay?bookingId={bookingId}");
     }
 }

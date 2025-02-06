@@ -69,6 +69,9 @@
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
     private int CustomerId { get; set; }
+    private int SportLocationId { get; set; }
+    private int? TimeslotId1 { get; set; }
+    private int? TimeslotId2 { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -79,90 +82,65 @@
             string selectedDate = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedDate") ?? DateTime.Now.ToString("yyyy-MM-dd");
             string selectedTimeslotsJson = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "SelectedTimeslots");
 
+            SelectedDate = DateTime.Parse(selectedDate);
+            SelectedTimeslots = string.IsNullOrEmpty(selectedTimeslotsJson) ? new List<SelectedTimeslot>() : JsonSerializer.Deserialize<List<SelectedTimeslot>>(selectedTimeslotsJson);
+
             var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
             if (user.Identity.IsAuthenticated)
             {
                 var customerEmail = user.FindFirstValue(ClaimTypes.Email);
+                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == customerEmail);
+                CustomerId = customer?.Id ?? 0;
                 Customer = await _context.Customer.FirstOrDefaultAsync(c => c.Email == customerEmail);  // Fetch the customer based on email
                 CustomerId = Customer?.Id ?? 0;
             }
 
-            SelectedDate = DateTime.Parse(selectedDate);
-            SelectedTimeslots = string.IsNullOrEmpty(selectedTimeslotsJson) ? new List<SelectedTimeslot>() : JsonSerializer.Deserialize<List<SelectedTimeslot>>(selectedTimeslotsJson);
+            // Retrieve SportLocationId based on selected sport and location
+            var sportLocation = await _context.SportLocation
+                .FirstOrDefaultAsync(sl => sl.Sport.Name == SelectedSportName && sl.Location.Name == SelectedLocationName);
+            SportLocationId = sportLocation?.Id ?? 0;
+
+            // Retrieve SportLocationTimeslotId1 and SportLocationTimeslotId2 based on selected timeslots
+            if (SelectedTimeslots.Count > 0)
+            {
+                var timeslot1 = await _context.SportLocationTimeslots
+                    .FirstOrDefaultAsync(slt => slt.SportLocationId == SportLocationId && slt.Timeslot.Description == SelectedTimeslots[0].Description);
+                TimeslotId1 = timeslot1?.Id;
+            }
+
+            if (SelectedTimeslots.Count > 1)
+            {
+                var timeslot2 = await _context.SportLocationTimeslots
+                    .FirstOrDefaultAsync(slt => slt.SportLocationId == SportLocationId && slt.Timeslot.Description == SelectedTimeslots[1].Description);
+                TimeslotId2 = timeslot2?.Id;
+            }
 
             isRendered = true;
             StateHasChanged();
         }
     }
 
-
     private async Task ProcessBooking()
     {
-        foreach (var timeslot in SelectedTimeslots)
-        {
-            await DecrementAvailableSlots(timeslot);
-        }
-
-        var booking = await CreateBooking();
-        NavigationManager.NavigateTo($"/pay?bookingId={booking.Id}");
-    }
-
-    private async Task DecrementAvailableSlots(SelectedTimeslot timeslot)
-    {
-        var schedule = await _context.Schedules
-            .Include(s => s.SportLocationTimeslot)
-            .ThenInclude(slt => slt.SportLocation)
-            .Where(s => s.SportLocationTimeslot.Timeslot.Description == timeslot.Description
-                        && s.SportLocationTimeslot.SportLocation.Location.Name == SelectedLocationName
-                        && s.ScheduledDate.Date == SelectedDate.Date)
-            .FirstOrDefaultAsync();
-
-        if (schedule != null && schedule.AvailableSlots > 0)
-        {
-            schedule.AvailableSlots -= 1;
-            _context.Schedules.Update(schedule);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    private async Task<Bookings> CreateBooking()
-    {
-        var newBooking = new Bookings
+        var booking = new Bookings
             {
                 CustomerId = CustomerId,
+                SportLocationTimeslotId1 = TimeslotId1,   // Using the correct SportLocationTimeslot ID
+                SportLocationTimeslotId2 = TimeslotId2,   // Using the correct SportLocationTimeslot ID
                 BookingDate = SelectedDate,
                 TotalAmount = TotalPrice,
                 BookingStatus = "Pending",
                 IsPaid = false,
-                CreatedBy = Customer.FirstName +" "+Customer.LastName,
-                UpdatedBy = Customer.FirstName +" "+Customer.LastName,
+                PaymentDate = null,
+                CreatedBy = Customer.FirstName + " " + Customer.LastName,
+                UpdatedBy = Customer.FirstName + " " + Customer.LastName,
                 DateCreated = DateTime.Now,
                 DateUpdated = DateTime.Now
             };
 
-        _context.Bookings.Add(newBooking);
+        _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
-
-        // Store the correct SportLocationTimeslot for each selected timeslot
-        foreach (var timeslot in SelectedTimeslots)
-        {
-            var sportLocationTimeslot = await _context.SportLocationTimeslots
-                .Include(slt => slt.SportLocation)
-                .Include(slt => slt.Timeslot)
-                .Where(slt => slt.SportLocation.Location.Name == SelectedLocationName
-                              && slt.SportLocation.Sport.Name == SelectedSportName
-                              && slt.Timeslot.Description == timeslot.Description)
-                .FirstOrDefaultAsync();
-
-            if (sportLocationTimeslot != null)
-            {
-                newBooking.SportLocationTimeslotId = sportLocationTimeslot.Id;
-                _context.Bookings.Update(newBooking);  // Link directly to SportLocationTimeslot
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        return newBooking;
+        NavigationManager.NavigateTo($"/pay?bookingId={booking.Id}");
     }
 
     public class SelectedTimeslot

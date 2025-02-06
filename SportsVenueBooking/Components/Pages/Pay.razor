@@ -72,24 +72,28 @@
             {
                 <div class="summary-item">
                     <span>Sport:</span>
-                    <span>@BookingDetails.SportLocation?.Sport?.Name</span>
+                    <span>@BookingDetails.SportLocationTimeslot1?.SportLocation?.Sport.Name</span>
                 </div>
                 <div class="summary-item">
                     <span>Location:</span>
-                    <span>@BookingDetails.SportLocation?.Location?.Name</span>
+                    <span>@BookingDetails.SportLocationTimeslot1?.SportLocation?.Location?.Name</span>
                 </div>
                 <div class="summary-item">
                     <span>Date:</span>
                     <span>@BookingDetails.BookingDate.ToString("yyyy-MM-dd")</span>
                 </div>
                 <div class="summary-item">
-                    <span>Time Slot:</span>
-                    @if (BookingDetails.SportLocationTimeslot != null)
-                    {
-                        <ul>
-                            <li>@BookingDetails.SportLocationTimeslot.Timeslot?.Description</li>
-                        </ul>
-                    }
+                    <span>Time Slots:</span>
+                    <ul>
+                        @if (BookingDetails.SportLocationTimeslot1 != null)
+                        {
+                            <li>@BookingDetails.SportLocationTimeslot1.Timeslot?.Description</li>
+                        }
+                        @if (BookingDetails.SportLocationTimeslot2 != null)
+                        {
+                            <li>@BookingDetails.SportLocationTimeslot2.Timeslot?.Description</li>
+                        }
+                    </ul>
                 </div>
                 <div class="summary-item">
                     <span>Total Price:</span>
@@ -140,7 +144,10 @@
         {
             BookingId = bookingId;
             BookingDetails = await _context.Bookings
-                .Include(b => b.SportLocationTimeslot)
+                .Include(b => b.SportLocationTimeslot1)
+                    .ThenInclude(slt => slt.SportLocation)
+                        .ThenInclude(sl => sl.Sport)
+                .Include(b => b.SportLocationTimeslot2)
                     .ThenInclude(slt => slt.SportLocation)
                         .ThenInclude(sl => sl.Sport)
                 .FirstOrDefaultAsync(b => b.Id == BookingId);
