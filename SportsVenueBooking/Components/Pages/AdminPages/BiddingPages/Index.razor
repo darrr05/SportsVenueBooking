@@ -1,57 +1,47 @@
-﻿@page "/bookings"
+﻿@page "/biddings"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using SportsVenueBooking.Domain
 @using SportsVenueBooking.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
-@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
 <h1>Index</h1>
 
 <p>
-    <a href="bookings/create">Create New</a>
+    <a href="biddings/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Bookings" Pagination="paginationState">
-    <PropertyColumn Property="bookings => bookings.BookingDate" Sortable="true" />
-    @* <PropertyColumn Property="bookings => bookings.CustomerId" /> *@
-    <TemplateColumn Context="Bookings" Title="Customer">
-        @GetCustomerString(Bookings.CustomerId)
+<QuickGrid Class="table" Items="context.Bidding">
+    @* <PropertyColumn Property="bidding => bidding.SportLocationTimeSlotId" /> *@
+    <TemplateColumn Context="bidding" Title="Sport">
+        @GetSportString(bidding.SportLocationTimeSlotId)
     </TemplateColumn>
-    @* <PropertyColumn Property="bookings => bookings.SportLocationTimeslotId" /> *@
-    <TemplateColumn Context="Bookings" Title="Sport">
-        @GetSportString(Bookings.SportLocationTimeslotId1)
+    <TemplateColumn Context="bidding" Title="Location">
+        @GetLocationString(bidding.SportLocationTimeSlotId)
     </TemplateColumn>
-    <TemplateColumn Context="Bookings" Title="Location">
-        @GetLocationString(Bookings.SportLocationTimeslotId1)
+    <TemplateColumn Context="bidding" Title="Timeslot">
+        @GetTimeslotString(bidding.SportLocationTimeSlotId)
     </TemplateColumn>
-    <TemplateColumn Context="Bookings" Title="Timeslot1">
-        @GetTimeslotString(Bookings.SportLocationTimeslotId1)
-    </TemplateColumn>
-    <TemplateColumn Context="Bookings" Title="Timeslot2">
-        @GetTimeslotString(Bookings.SportLocationTimeslotId2)
-    </TemplateColumn>
-    <PropertyColumn Property="bookings => bookings.TotalAmount" />
-    <PropertyColumn Property="bookings => bookings.BookingStatus" />
-    <PropertyColumn Property="bookings => bookings.CancellationReason" />
-    <PropertyColumn Property="bookings => bookings.CancellationDate" />
-    <PropertyColumn Property="bookings => bookings.IsPaid" />
-    <PropertyColumn Property="bookings => bookings.PaymentDate" />
-    <PropertyColumn Property="bookings => bookings.DateCreated" />
-    <PropertyColumn Property="bookings => bookings.DateUpdated" />
-    <PropertyColumn Property="bookings => bookings.CreatedBy" />
-    <PropertyColumn Property="bookings => bookings.UpdatedBy" />
+    <PropertyColumn Property="bidding => bidding.CustomerId" />
+    <PropertyColumn Property="bidding => bidding.AppointtedDate" />
+    <PropertyColumn Property="bidding => bidding.BidAmount" />
+    <PropertyColumn Property="bidding => bidding.BidDate" />
+    <PropertyColumn Property="bidding => bidding.BidStatus" />
+    <PropertyColumn Property="bidding => bidding.BidEndTime" />
+    <PropertyColumn Property="bidding => bidding.DateCreated" />
+    <PropertyColumn Property="bidding => bidding.DateUpdated" />
+    <PropertyColumn Property="bidding => bidding.CreatedBy" />
+    <PropertyColumn Property="bidding => bidding.UpdatedBy" />
 
-    <TemplateColumn Context="bookings">
-        <a href="@($"bookings/edit?id={bookings.Id}")">Edit</a> |
-        <a href="@($"bookings/details?id={bookings.Id}")">Details</a> |
-        <a href="@($"bookings/delete?id={bookings.Id}")">Delete</a>
+    <TemplateColumn Context="bidding">
+        <a href="@($"biddings/edit?id={bidding.Id}")">Edit</a> |
+        <a href="@($"biddings/details?id={bidding.Id}")">Details</a> |
+        <a href="@($"biddings/delete?id={bidding.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
-<Paginator State="paginationState" />
 
 @code {
     private SportsVenueBookingContext context = default!;

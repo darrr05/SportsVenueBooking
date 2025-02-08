@@ -1,0 +1,70 @@
+﻿@page "/biddings/details"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Bidding</h2>
+    <hr />
+    @if (bidding is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SportLocationTimeSlotId</dt>
+            <dd class="col-sm-10">@bidding.SportLocationTimeSlotId</dd>
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@bidding.CustomerId</dd>
+            <dt class="col-sm-2">AppointtedDate</dt>
+            <dd class="col-sm-10">@bidding.AppointtedDate</dd>
+            <dt class="col-sm-2">BidAmount</dt>
+            <dd class="col-sm-10">@bidding.BidAmount</dd>
+            <dt class="col-sm-2">BidDate</dt>
+            <dd class="col-sm-10">@bidding.BidDate</dd>
+            <dt class="col-sm-2">BidStatus</dt>
+            <dd class="col-sm-10">@bidding.BidStatus</dd>
+            <dt class="col-sm-2">BidEndTime</dt>
+            <dd class="col-sm-10">@bidding.BidEndTime</dd>
+            <dt class="col-sm-2">AddHours</dt>
+            <dd class="col-sm-10">@bidding.AddHours</dd>
+            <dt class="col-sm-2">AddMinutes</dt>
+            <dd class="col-sm-10">@bidding.AddMinutes</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@bidding.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@bidding.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@bidding.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@bidding.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/biddings/edit?id={bidding.Id}")">Edit</a> |
+            <a href="@($"/biddings")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Bidding? bidding;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        bidding = await context.Bidding.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (bidding is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

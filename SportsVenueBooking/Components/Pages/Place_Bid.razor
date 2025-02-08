@@ -1,0 +1,236 @@
+﻿@page "/place-bid/{BidId:int}"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@using System.Security.Claims
+@inject SportsVenueBookingContext _context
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Place a Bid</h3>
+
+<head>
+    <link rel="stylesheet" href="styles/Bid.css">
+</head>
+
+@if (Bid != null)
+{
+    <div>
+        <p><strong>Sport:</strong> @(Bid.SportLocationTimeslots?.SportLocation?.Sport?.Name ?? "No Sport")</p>
+        <p><strong>Location:</strong> @(Bid.SportLocationTimeslots?.SportLocation?.Location?.Name ?? "No Location")</p>
+        <p><strong>Time Slot:</strong> @(Bid.SportLocationTimeslots?.Timeslot?.Description ?? "No Timeslot")</p>
+        <p><strong>Current Highest Bid:</strong> @Bid.BidAmount.ToString("C")</p>
+        <p><strong>Bid End Time:</strong> @Bid.BidEndTime.ToString("g")</p>
+
+        @if (UserBid != null)
+        {
+            <p><strong>Your Current Bid:</strong> @UserBid.BidAmount.ToString("C")</p>
+        }
+        else
+        {
+            <p><strong>You have not placed a bid yet.</strong></p>
+        }
+    </div>
+
+    <div class="form-group">
+        <label for="BidAmount">Your Bid Amount</label>
+        <InputNumber id="BidAmount" class="form-control" @bind-Value="NewBidAmount"
+                     min="@(Bid.BidAmount + 1)" />
+    </div>
+
+    <button @onclick="HandleBidSubmit" class="btn btn-primary" disabled="@(!CanSubmitBid)">Place Bid</button>
+    <div class="back">
+        <a href="/Available_bids">Back</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert @(Message.Contains("successfully") ? "alert-success" : "alert-danger")">
+            @Message
+        </div>
+    }
+}
+else
+{
+    <p>Bid not found.</p>
+}
+
+@code {
+    [Parameter] public int BidId { get; set; }
+
+    private Bidding Bid { get; set; }
+    private double NewBidAmount { get; set; }
+    private Bidding UserBid { get; set; }
+    private string Message { get; set; }
+    private int CustomerId { get; set; }
+    private Customer Customer { get; set; }
+    private bool CanSubmitBid => NewBidAmount > Bid?.BidAmount;
+
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get customer email from Claims
+            var customerEmail = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(customerEmail))
+            {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            // Fetch the customer by email
+            Customer = await _context.Customer
+                .FirstOrDefaultAsync(c => c.Email == customerEmail);
+
+            if (Customer == null)
+            {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            CustomerId = Customer.Id;
+
+            // Fetch the existing bid with comprehensive include
+            Bid = await _context.Bidding
+                .Include(b => b.SportLocationTimeslots)
+                    .ThenInclude(slt => slt.SportLocation)
+                        .ThenInclude(sl => sl.Sport)
+                .Include(b => b.SportLocationTimeslots)
+                    .ThenInclude(slt => slt.SportLocation)
+                        .ThenInclude(sl => sl.Location)
+                .Include(b => b.SportLocationTimeslots)
+                    .ThenInclude(slt => slt.Timeslot)
+                .FirstOrDefaultAsync(b => b.Id == BidId);
+
+            if (Bid == null)
+            {
+                Message = "Invalid bid selected.";
+                return;
+            }
+
+            // Check for expired bids and create bookings if needed
+            await CheckForExpiredBidsAndCreateBookings();
+
+            // Fetch the user's current bid
+            UserBid = await _context.Bidding
+                .FirstOrDefaultAsync(b =>
+                    b.CustomerId == CustomerId &&
+                    b.SportLocationTimeSlotId == Bid.SportLocationTimeSlotId);
+
+            // Initialize NewBidAmount to the current highest bid plus 1
+            NewBidAmount = Bid.BidAmount + 1;
+        }
+        catch (Exception ex)
+        {
+            Message = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private async Task CheckForExpiredBidsAndCreateBookings()
+    {
+        var currentTime = DateTime.Now;
+
+        // Fetch expired bids for the current sport location timeslot
+        var expiredBids = await _context.Bidding
+            .Where(b => b.SportLocationTimeSlotId == Bid.SportLocationTimeSlotId &&
+                        b.BidStatus == "Pending" &&
+                        b.BidEndTime <= currentTime)
+            .ToListAsync();
+
+        foreach (var expiredBid in expiredBids)
+        {
+            if (expiredBid.CustomerId.HasValue)
+            {
+                var booking = new Bookings
+                    {
+                        CustomerId = expiredBid.CustomerId.Value,
+                        SportLocationTimeslotId1 = expiredBid.SportLocationTimeSlotId,
+                        BookingDate = DateTime.Now,
+                        TotalAmount = expiredBid.BidAmount,
+                        BookingStatus = "Pending",
+                        CreatedBy = "System",
+                        UpdatedBy = "System",
+                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now
+                    };
+
+                _context.Bookings.Add(booking);
+                expiredBid.BidStatus = "Completed";
+            }
+            else
+            {
+                expiredBid.BidStatus = "Expired";
+            }
+        }
+
+        if (expiredBids.Any())
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private async Task HandleBidSubmit()
+    {
+        if (!CanSubmitBid)
+        {
+            Message = "Your bid must be higher than the current bid.";
+            return;
+        }
+
+        try
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                var currentBid = await _context.Bidding
+                    .FirstOrDefaultAsync(b => b.Id == BidId);
+
+                if (currentBid.BidAmount >= NewBidAmount)
+                {
+                    Message = "Bid has been updated by another user. Please refresh and try again.";
+                    return;
+                }
+
+                if (UserBid == null)
+                {
+                    UserBid = new Bidding
+                        {
+                            CustomerId = CustomerId,
+                            SportLocationTimeSlotId = Bid.SportLocationTimeSlotId,
+                            BidAmount = NewBidAmount,
+                            BidStatus = "Pending",
+                            BidEndTime = Bid.BidEndTime
+                        };
+                    _context.Bidding.Add(UserBid);
+                }
+                else
+                {
+                    UserBid.BidAmount = NewBidAmount;
+                    _context.Bidding.Update(UserBid);
+                }
+
+                Bid.BidAmount = NewBidAmount;
+                Bid.CustomerId = CustomerId;
+                Bid.BidStatus = "Pending";
+                _context.Bidding.Update(Bid);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                Message = "Your bid has been placed successfully!";
+
+                // Check for expired bids after submission
+                await CheckForExpiredBidsAndCreateBookings();
+
+                // Refresh the current bid details
+                await OnInitializedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = $"Error placing bid: {ex.Message}";
+        }
+    }
+}

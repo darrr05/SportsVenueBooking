@@ -1,0 +1,202 @@
+﻿@page "/biddings/edit"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Bidding</h2>
+<hr />
+@if (Bidding is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Bidding" OnValidSubmit="UpdateBidding" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="Bidding.Id" value="@Bidding.Id" />
+                <div class="mb-3">
+                    <label for="sportlocationtimeslotid" class="form-label">SportLocationTimeSlotId:</label>
+                    <InputSelect id="sportlocationtimeslotid" @bind-Value="Bidding.SportLocationTimeSlotId" class="form-control">
+                        <option value="">-- Select Sport Location Timeslot --</option>
+                        @if (SportLocationTimeslots != null && SportLocationTimeslots.Any())
+                        {
+                            foreach (var sportlocationtimeslot in SportLocationTimeslots)
+                            {
+                                <option value="@sportlocationtimeslot.Id">
+                                    @sportlocationtimeslot.SportLocation.Sport.Name, @sportlocationtimeslot.SportLocation.Location.Name
+                                    (Timeslot: @sportlocationtimeslot.Timeslot.Description)
+                                </option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>No available timeslots</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Bidding.SportLocationTimeSlotId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="customerid" class="form-label">CustomerId:</label>
+                    <InputSelect id="customerid" @bind-Value="Bidding.CustomerId" class="form-control">
+                        <option value="0">Select Customer</option>
+                        @foreach (var customer in Customers)
+                        {
+                            <option value="@customer.Id">@customer.FirstName @customer.LastName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Bidding.CustomerId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="appointteddate" class="form-label">AppointtedDate:</label>
+                    <InputDate id="appointteddate" @bind-Value="Bidding.AppointtedDate" class="form-control" />
+                    <ValidationMessage For="() => Bidding.AppointtedDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="addHours" class="form-label">EndTime Delay(Hours):</label>
+                    <InputNumber id="addHours" @bind-Value="Bidding.AddHours" class="form-control"
+                                 min="0" max="24" step="1" />
+                    <ValidationMessage For="() => Bidding.AddHours" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="addMinutes" class="form-label">EndTime Delay(Minutes):</label>
+                    <InputNumber id="addMinutes" @bind-Value="Bidding.AddMinutes" class="form-control"
+                                 min="0" max="59" step="1" />
+                    <ValidationMessage For="() => Bidding.AddMinutes" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="bidamount" class="form-label">BidAmount:</label>
+                    <InputNumber id="bidamount" @bind-Value="Bidding.BidAmount" class="form-control" />
+                    <ValidationMessage For="() => Bidding.BidAmount" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="biddate" class="form-label">BidDate:</label>
+                    <InputDate id="biddate" @bind-Value="Bidding.BidDate" class="form-control" />
+                    <ValidationMessage For="() => Bidding.BidDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="bidstatus" class="form-label">BidStatus:</label>
+                    <InputSelect id="bidstatus" @bind-Value="Bidding.BidStatus" class="form-control">
+                        <option value="">Select Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Bidding.BidStatus" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="bidendtime" class="form-label">BidEndTime:</label>
+                    <InputDate id="bidendtime" @bind-Value="Bidding.BidEndTime" class="form-control" />
+                    <ValidationMessage For="() => Bidding.BidEndTime" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Bidding.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Bidding.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Bidding.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Bidding.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Bidding.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Bidding.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3" hidden>
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Bidding.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Bidding.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/biddings">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Bidding? Bidding { get; set; }
+
+    private List<Customer> Customers = new();
+    private IList<SportLocationTimeslot> SportLocationTimeslots { get; set; }
+
+    private string userId = "System";
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Bidding ??= await context.Bidding.FirstOrDefaultAsync(m => m.Id == Id);
+        Customers = await context.Customer.ToListAsync();
+
+        // Load the sport location timeslots with necessary relationships
+        SportLocationTimeslots = await context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation) // Ensure we include the SportLocation
+                .ThenInclude(sl => sl.Sport) // Include the Sport related entity
+            .Include(slt => slt.SportLocation) // Again include the SportLocation
+                .ThenInclude(sl => sl.Location) // Include the Location related entity
+            .Include(slt => slt.Timeslot) // Include the Timeslot entity
+            .ToListAsync();
+
+        if (Bidding is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateBidding()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Bidding!).State = EntityState.Modified;
+
+        if (Bidding.CustomerId == 0)
+        {
+            Bidding.CustomerId = null;
+        }
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!BiddingExists(Bidding!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        Bidding.BidEndTime = Bidding.BidEndTime = DateTime.Now.AddHours(Bidding.AddHours).AddMinutes(Bidding.AddMinutes);
+        Bidding.UpdatedBy = userId;
+        Bidding.DateUpdated = DateTime.Now;
+        NavigationManager.NavigateTo("/biddings");
+    }
+
+    private bool BiddingExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Bidding.Any(e => e.Id == id);
+    }
+}

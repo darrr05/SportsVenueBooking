@@ -1,0 +1,103 @@
+﻿@page "/biddings/delete"
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Domain
+@inject IDbContextFactory<SportsVenueBooking.Data.SportsVenueBookingContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Bidding</h2>
+    <hr />
+    @if (bidding is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SportLocationTimeSlotId</dt>
+            <dd class="col-sm-10">@bidding.SportLocationTimeSlotId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@bidding.CustomerId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">AppointtedDate</dt>
+            <dd class="col-sm-10">@bidding.AppointtedDate</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BidAmount</dt>
+            <dd class="col-sm-10">@bidding.BidAmount</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BidDate</dt>
+            <dd class="col-sm-10">@bidding.BidDate</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BidStatus</dt>
+            <dd class="col-sm-10">@bidding.BidStatus</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BidEndTime</dt>
+            <dd class="col-sm-10">@bidding.BidEndTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">AddHours</dt>
+            <dd class="col-sm-10">@bidding.AddHours</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">AddMinutes</dt>
+            <dd class="col-sm-10">@bidding.AddMinutes</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@bidding.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@bidding.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@bidding.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@bidding.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="bidding" OnValidSubmit="DeleteBidding" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(bidding is null)">Delete</button> |
+            <a href="/biddings">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Bidding? bidding;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        bidding = await context.Bidding.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (bidding is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteBidding()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Bidding.Remove(bidding!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/biddings");
+    }
+}

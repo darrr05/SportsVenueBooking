@@ -20,6 +20,8 @@ builder.Services.AddDbContextFactory<SportsVenueBookingContext>(options =>
 // Add QuickGrid support
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 // Add services for Razor Components with interactive server render mode
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
@@ -50,7 +52,9 @@ builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.Sign
 	.AddDefaultTokenProviders();
 
 // Add email sender (replace with real email sender in production)
-builder.Services.AddSingleton<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
+builder.Services.AddScoped<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
+builder.Services.AddTransient<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
+
 
 // Configure the cookie settings for identity
 builder.Services.ConfigureApplicationCookie(options =>
@@ -94,6 +98,7 @@ if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error");
 	app.UseHsts();
+    app.UseMigrationsEndPoint();
 	app.UseMigrationsEndPoint();
 }
 

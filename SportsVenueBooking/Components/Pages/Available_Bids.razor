@@ -1,0 +1,155 @@
+﻿@page "/available-biddings"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using SportsVenueBooking.Data
+@using SportsVenueBooking.Domain
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject SportsVenueBookingContext _context
+@rendermode InteractiveServer
+
+<h3>Available Bids</h3>
+
+<head>
+    <link rel="stylesheet" href="styles/Bid.css">
+</head>
+
+@if (Bids.Any())
+{
+    @foreach (var bid in Bids)
+    {
+        <div class="bid-item">
+            @* <p><strong>Bid ID:</strong> @bid.Id</p> *@
+
+            @if (bid.SportLocationTimeslots != null)
+            {
+                <p><strong>Sport:</strong> @(bid.SportLocationTimeslots.SportLocation?.Sport?.Name ?? "No Sport")</p>
+                <p><strong>Location:</strong> @(bid.SportLocationTimeslots.SportLocation?.Location?.Name ?? "No Location")</p>
+                <p><strong>Time Slot:</strong> @(bid.SportLocationTimeslots.Timeslot?.Description ?? "No Timeslot")</p>
+            }
+
+            @* <p><strong>Bid Amount:</strong> @bid.BidAmount</p> *@
+            @* <p><strong>Status:</strong> @bid.BidStatus</p> *@
+            @* <p><strong>Bid Start Time:</strong> @bid.BidDate.ToString("yyyy-MM-dd HH:mm:ss")</p> *@
+            <p><strong>Ending At:</strong> @bid.BidEndTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
+
+            @if (bid.BidStatus == "Pending")
+            {
+                <button class="btn btn-primary" @onclick="() => PlaceBid(bid.Id)">Place New Bid</button>
+                <button class="btn btn-info" @onclick="() => ViewBidDetails(bid.Id)">View Details</button>
+            }
+        </div>
+    }
+}
+else
+{
+    <p>No active bids found.</p>
+}
+
+<!-- View Bid Details Modal -->
+@if (ShowBidDetailsModal)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display:block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bid Details</h5>
+                    <button type="button" class="close" @onclick="CloseBidDetailsModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Sport:</strong> @(SelectedBid.SportLocationTimeslots?.SportLocation?.Sport?.Name ?? "No Sport")</p>
+                    <p><strong>Location:</strong> @(SelectedBid.SportLocationTimeslots?.SportLocation?.Location?.Name ?? "No Location")</p>
+                    <p><strong>Time Slot:</strong> @(SelectedBid.SportLocationTimeslots?.Timeslot?.Description ?? "No Timeslot")</p>
+                    @* <p><strong>Bid Amount:</strong> @SelectedBid.BidAmount</p> *@
+                    @* <p><strong>Status:</strong> @SelectedBid.BidStatus</p> *@
+                    <p><strong>Bid Started On:</strong> @SelectedBid.BidDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                    <p><strong>Bid End Time:</strong> @SelectedBid.BidEndTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseBidDetailsModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="() => PlaceBid(SelectedBid.Id)">Place New Bid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Bidding> Bids { get; set; } = new();
+    private Bidding SelectedBid { get; set; }
+    private bool ShowBidDetailsModal { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Fetch available bids from the database and update their statuses
+        await LoadBids();
+    }
+
+    private async Task LoadBids()
+    {
+        // Fetch the bids, including related entities
+        Bids = await _context.Bidding
+            .Include(b => b.SportLocationTimeslots)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Sport)
+            .Include(b => b.SportLocationTimeslots)
+                .ThenInclude(slt => slt.SportLocation)
+                    .ThenInclude(sl => sl.Location)
+            .Include(b => b.SportLocationTimeslots)
+                .ThenInclude(slt => slt.Timeslot)
+            .ToListAsync();
+
+        // Update the status of each bid based on the BidEndTime and whether a bid has been placed
+        foreach (var bid in Bids)
+        {
+            if (bid.BidEndTime < DateTime.Now) // Bid has ended
+            {
+                if (bid.CustomerId.HasValue) // A customer placed a bid
+                {
+                    bid.BidStatus = "Completed"; // Mark as completed
+                }
+                else
+                {
+                    bid.BidStatus = "Cancelled"; // No bids placed, mark as cancelled
+                }
+            }
+            else
+            {
+                bid.BidStatus = "Pending"; // Bidding is still in progress
+            }
+        }
+
+        // Filter out bids that are not "Pending"
+        Bids = Bids.Where(b => b.BidStatus == "Pending").ToList();
+
+        // Update the database if necessary (only if you're tracking status changes)
+        await _context.SaveChangesAsync();
+    }
+
+    private void PlaceBid(int bidId)
+    {
+        // Logic to place a bid (e.g., show a form or navigate to a payment page)
+        NavigationManager.NavigateTo($"/place-bid/{bidId}");
+    }
+
+    private void ViewBidDetails(int bidId)
+    {
+        SelectedBid = Bids.FirstOrDefault(b => b.Id == bidId);
+        ShowBidDetailsModal = true;
+    }
+
+    private void CloseBidDetailsModal()
+    {
+        ShowBidDetailsModal = false;
+    }
+}

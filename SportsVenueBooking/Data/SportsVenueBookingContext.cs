@@ -22,6 +22,7 @@ namespace SportsVenueBooking.Data
 		public DbSet<Payment> Payment { get; set; } = default!;
 		public DbSet<Discount> Discounts { get; set; } = default!;
 		public DbSet<ContactUs> ContactUs { get; set; } = default!;
+		public DbSet<Bidding> Bidding { get; set; } = default!;
 		public DbSet<SportLocation> SportLocation { get; set; } = default!;
 		public DbSet<SportLocationTimeslot> SportLocationTimeslots { get; set; } = default!;
 

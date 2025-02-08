@@ -15,12 +15,19 @@
     <a href="sportlocations/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.SportLocation" Pagination="paginationState">
+<QuickGrid Class="table" Items="FilteredSportLocations" Pagination="paginationState">
     @* <PropertyColumn Property="sportlocation => sportlocation.SportId" />
     <PropertyColumn Property="sportlocation => sportlocation.LocationId" /> *@  
 
-    <TemplateColumn Context="SportLocation" Title="Sport">
-        @GetSportString(SportLocation.SportId)
+    <TemplateColumn Context="SportLocation" Title="Sport" Sortable="true">
+        <ChildContent>
+            @GetSportString(SportLocation.SportId)
+        </ChildContent>
+        <ColumnOptions>
+            <div>
+                <input type="search" @bind="searchText" @bind:event="oninput" autofocus />
+            </div>
+        </ColumnOptions>
     </TemplateColumn>
     <TemplateColumn Context="SportLocation" Title="Location">
         @GetLocationString(SportLocation.LocationId)
@@ -46,6 +53,9 @@
     private Dictionary<int, Sport> SportsDict = new Dictionary<int, Sport>();
     private Dictionary<int, Location> LocationsDict = new Dictionary<int, Location>();
     PaginationState paginationState = new PaginationState { ItemsPerPage = 1 };
+    private string searchText = "";
+    private IQueryable<SportLocation> FilteredSportLocations => context.SportLocation.Where(sl =>
+    sl.Sport.Name.Contains(searchText));
 
     // GetSportString method to get the sport string
     private string GetSportString(int sportId)
