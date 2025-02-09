@@ -84,32 +84,5 @@ namespace SportsVenueBooking.Components.Account
 
 			await smtpClient.SendMailAsync(mailMessage);
 		}
-
-		public async Task SendBookingConfirmationAsync(string email, Bookings bookingDetails)
-		{
-			try
-			{
-				var smtpClient = GetSmtpClient();
-				var mailMessage = new MailMessage
-				{
-					From = new MailAddress("no-reply@example.com"), // Sender email
-					Subject = "Booking Confirmation",
-					Body = $"<h3>Your booking is confirmed!</h3><p>Sport: {bookingDetails.SportLocationTimeslot1?.SportLocation?.Sport.Name}</p>" +
-						   $"<p>Location: {bookingDetails.SportLocationTimeslot1?.SportLocation?.Location?.Name}</p>" +
-						   $"<p>Date: {bookingDetails.BookingDate:yyyy-MM-dd}</p>" +
-						   $"<p>Time Slot: {bookingDetails.SportLocationTimeslot1?.Timeslot?.Description}</p>" +
-						   $"<p>Total Price: ${bookingDetails.TotalAmount}</p>",
-					IsBodyHtml = true // HTML body
-				};
-				mailMessage.To.Add(email); // Recipient's email
-
-				await smtpClient.SendMailAsync(mailMessage);  // Send the email
-			}
-			catch (SmtpException ex)
-			{
-				// Log error or handle the exception as needed
-				throw;  // Optionally, rethrow to handle it at a higher level
-			}
-		}
 	}
 }

@@ -53,8 +53,6 @@ builder.Services.AddIdentityCore<SportsVenueBookingUser>(options => options.Sign
 
 // Add email sender (replace with real email sender in production)
 builder.Services.AddScoped<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
-builder.Services.AddTransient<IEmailSender<SportsVenueBookingUser>, RealEmailSender>();
-
 
 // Configure the cookie settings for identity
 builder.Services.ConfigureApplicationCookie(options =>

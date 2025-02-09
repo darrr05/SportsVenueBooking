@@ -66,7 +66,7 @@
     // Filtered list based on search query
     private IEnumerable<Sport> FilteredSports => string.IsNullOrEmpty(SearchQuery)
         ? Sports
-        : Sports.Where(sport => sport.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+        : Sports.Where(sport => sport.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)); //to compare strings without considering case sensitivity.
 
     protected override async Task OnInitializedAsync()
     {

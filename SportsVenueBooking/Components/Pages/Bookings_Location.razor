@@ -110,7 +110,7 @@
 
     private async Task UpdateMapAsync(string address)
     {
-        var mapUrl = $"https://www.google.com/maps/embed/v1/place?key=AIzaSyAzE1G-GphoHAkPete7e0snd8BaHLFw_2g&q={Uri.EscapeDataString(address)}";
+        var mapUrl = $"https://www.google.com/maps/embed/v1/place?key=AIzaSyAzE1G-GphoHAkPete7e0snd8BaHLFw_2g&q={Uri.EscapeDataString(address)}"; 
         await JSRuntime.InvokeVoidAsync("updateMapSrc", "googleMap", mapUrl);
     }
 
