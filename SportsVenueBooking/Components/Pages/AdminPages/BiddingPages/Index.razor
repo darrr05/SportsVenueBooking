@@ -60,26 +60,22 @@
     // GetSportString method to get the sport string
     private string GetSportString(int? SportLocationTimeslotId)
     {
-        var sport = Sports.FirstOrDefault(s => s.Id == SportLocationTimeslotId);
-        return sport == null ?
-        string.Empty : $"{sport.Name}";
+        var sportLocationTimeslot = SportLocationTimeslots.FirstOrDefault(slt => slt.Id == SportLocationTimeslotId);
+        return sportLocationTimeslot?.SportLocation?.Sport?.Name ?? string.Empty;
     }
 
-    // GetLocationString method to get the location string
     private string GetLocationString(int? SportLocationTimeslotId)
     {
-        var location = Locations.FirstOrDefault(l => l.Id == SportLocationTimeslotId);
-        return location == null ?
-        string.Empty : $"{location.Name}";
+        var sportLocationTimeslot = SportLocationTimeslots.FirstOrDefault(slt => slt.Id == SportLocationTimeslotId);
+        return sportLocationTimeslot?.SportLocation?.Location?.Name ?? string.Empty;
     }
 
-    // Get Timeslot String method to get the timeslot string
     private string GetTimeslotString(int? SportLocationTimeslotId)
     {
-        var timeslot = Timeslots.FirstOrDefault(t => t.Id == SportLocationTimeslotId);
-        return timeslot == null ?
-        string.Empty : $"{timeslot.Description}";
+        var sportLocationTimeslot = SportLocationTimeslots.FirstOrDefault(slt => slt.Id == SportLocationTimeslotId);
+        return sportLocationTimeslot?.Timeslot?.Description ?? string.Empty;
     }
+
 
     // GetCustomerString method to get the customer string
     private string GetCustomerString(int customerId)
@@ -92,18 +88,20 @@
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
-        // Fetch and initialize the collections for SportLocationTimeslot, Sports, Locations, and Timeslots
-        SportLocationTimeslots = context.SportLocationTimeslots.ToList();
-        Sports = context.Sport.ToList();
-        Locations = context.Location.ToList();
-        Timeslots = context.Timeslot.ToList();
-        Customers = context.Customer.ToList();
 
-        // Populate dictionaries for faster lookups if necessary (optional)
-        SportsDict = Sports.ToDictionary(s => s.Id);
-        LocationsDict = Locations.ToDictionary(l => l.Id);
-        TimeslotsDict = Timeslots.ToDictionary(t => t.Id);
+        // Load SportLocationTimeslots with related data
+        SportLocationTimeslots = context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation)
+                .ThenInclude(sl => sl.Sport)
+            .Include(slt => slt.SportLocation)
+                .ThenInclude(sl => sl.Location)
+            .Include(slt => slt.Timeslot)
+            .ToList();
+
+        // Load other necessary tables
+        Customers = context.Customer.ToList();
     }
+
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

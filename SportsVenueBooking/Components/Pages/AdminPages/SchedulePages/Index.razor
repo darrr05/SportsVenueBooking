@@ -44,6 +44,7 @@
 @code {
     private SportsVenueBookingContext context = default!;
     private IList<SportLocationTimeslot> SportLocationTimeslots;
+    private IList<SportLocation> SportLocations;
     private IList<Timeslot> Timeslots;
     private IList<Sport> Sports;
     private IList<Location> Locations;
@@ -55,17 +56,21 @@
     // GetSportString method to get the sport string
     private string GetSportString(int SportLocationTimeslotId)
     {
-        var sport = Sports.FirstOrDefault(s => s.Id == SportLocationTimeslotId);
-        return sport == null ?
-        string.Empty : $"{sport.Name}";
+        var sportLocation = SportLocationTimeslots.FirstOrDefault(sl => sl.Id == SportLocationTimeslotId);
+        if (sportLocation == null) return string.Empty;
+
+        var sport = Sports.FirstOrDefault(s => s.Id == sportLocation.SportLocation.SportId);
+        return sport?.Name ?? string.Empty;
     }
 
     // GetLocationString method to get the location string
     private string GetLocationString(int SportLocationTimeslotId)
     {
-        var location = Locations.FirstOrDefault(l => l.Id == SportLocationTimeslotId);
-        return location == null ?
-        string.Empty : $"{location.Name}";
+        var sportLocation = SportLocationTimeslots.FirstOrDefault(sl => sl.Id == SportLocationTimeslotId);
+        if (sportLocation == null) return string.Empty;
+
+        var location = Locations.FirstOrDefault(l => l.Id == sportLocation.SportLocation.LocationId);
+        return location?.Name ?? string.Empty;
     }
 
     // Get Timeslot String method to get the timeslot string
@@ -82,6 +87,7 @@
 
         // Fetch and initialize the collections for SportLocationTimeslot, Sports, Locations, and Timeslots
         SportLocationTimeslots = context.SportLocationTimeslots.ToList();
+        SportLocations = context.SportLocation.ToList();
         Sports = context.Sport.ToList();
         Locations = context.Location.ToList();
         Timeslots = context.Timeslot.ToList();

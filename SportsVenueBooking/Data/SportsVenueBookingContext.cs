@@ -24,6 +24,8 @@ namespace SportsVenueBooking.Data
 		public DbSet<ContactUs> ContactUs { get; set; } = default!;
 		public DbSet<Bidding> Bidding { get; set; } = default!;
 		public DbSet<SportLocation> SportLocation { get; set; } = default!;
+		public DbSet<SportLocationTimeslot> SportLocationTimeslots1 { get; set; } = default!;
+		public DbSet<SportLocationTimeslot> SportLocationTimeslot2 { get; set; } = default!;
 		public DbSet<SportLocationTimeslot> SportLocationTimeslots { get; set; } = default!;
 
 		protected override void OnModelCreating(ModelBuilder builder)
@@ -56,6 +58,16 @@ namespace SportsVenueBooking.Data
 				.HasOne(st => st.Timeslot)
 				.WithMany()
 				.HasForeignKey(st => st.TimeslotId);
+
+			builder.Entity<Bookings>()
+				.HasOne(b => b.SportLocationTimeslot1)
+				.WithMany() // Assuming no back-reference is needed in SportLocationTimeslot
+				.HasForeignKey(b => b.SportLocationTimeslotId1);  // FK in Bookings table for Timeslot 1
+
+			builder.Entity<Bookings>()
+				.HasOne(b => b.SportLocationTimeslot2)
+				.WithMany() // Assuming no back-reference is needed in SportLocationTimeslot
+				.HasForeignKey(b => b.SportLocationTimeslotId2);
 
 			// Apply entity configurations for seeding data
 			builder.ApplyConfiguration(new LocationSeed());

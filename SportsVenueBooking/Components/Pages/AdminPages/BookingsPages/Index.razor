@@ -68,28 +68,44 @@
     PaginationState paginationState = new PaginationState { ItemsPerPage = 5 };
 
     // GetSportString method to get the sport string
-    private string GetSportString(int? SportLocationTimeslotId)
+    private string GetSportString(int? sportLocationTimeslotId)
     {
-        var sport = Sports.FirstOrDefault(s => s.Id == SportLocationTimeslotId);
-        return sport == null ?
-        string.Empty : $"{sport.Name}";
+        if (sportLocationTimeslotId == null) return "N/A";
+
+        using var context = DbFactory.CreateDbContext();
+        var timeslot = context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation)
+            .ThenInclude(sl => sl.Sport)
+            .FirstOrDefault(slt => slt.Id == sportLocationTimeslotId);
+
+        return timeslot?.SportLocation?.Sport?.Name ?? "N/A";
     }
 
-    // GetLocationString method to get the location string
-    private string GetLocationString(int? SportLocationTimeslotId)
+    private string GetLocationString(int? sportLocationTimeslotId)
     {
-        var location = Locations.FirstOrDefault(l => l.Id == SportLocationTimeslotId);
-        return location == null ?
-        string.Empty : $"{location.Name}";
+        if (sportLocationTimeslotId == null) return "N/A";
+
+        using var context = DbFactory.CreateDbContext();
+        var timeslot = context.SportLocationTimeslots
+            .Include(slt => slt.SportLocation)
+            .ThenInclude(sl => sl.Location)
+            .FirstOrDefault(slt => slt.Id == sportLocationTimeslotId);
+
+        return timeslot?.SportLocation?.Location?.Name ?? "N/A";
     }
 
-    // Get Timeslot String method to get the timeslot string
-    private string GetTimeslotString(int? SportLocationTimeslotId)
+    private string GetTimeslotString(int? sportLocationTimeslotId)
     {
-        var timeslot = Timeslots.FirstOrDefault(t => t.Id == SportLocationTimeslotId);
-        return timeslot == null ?
-        string.Empty : $"{timeslot.Description}";
+        if (sportLocationTimeslotId == null) return "N/A";
+
+        using var context = DbFactory.CreateDbContext();
+        var timeslot = context.SportLocationTimeslots
+            .Include(slt => slt.Timeslot)
+            .FirstOrDefault(slt => slt.Id == sportLocationTimeslotId);
+
+        return timeslot?.Timeslot?.Description ?? "N/A";
     }
+
 
     // GetCustomerString method to get the customer string
     private string GetCustomerString(int customerId)

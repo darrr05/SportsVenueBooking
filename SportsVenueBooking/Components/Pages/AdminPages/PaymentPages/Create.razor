@@ -36,7 +36,10 @@
             </div>
             <div class="mb-3">
                 <label for="paymentmethod" class="form-label">PaymentMethod:</label>
-                <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" />
+                <InputSelect id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control">
+                    <option value="">Select Status</option>
+                    <option value="Credit Card">Credit Card</option>
+                </InputSelect>
                 <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" />
             </div>
             <div class="mb-3">

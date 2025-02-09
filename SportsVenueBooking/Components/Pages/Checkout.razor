@@ -138,6 +138,26 @@
                 DateUpdated = DateTime.Now
             };
 
+        var schedule1 = await _context.Schedules
+        .FirstOrDefaultAsync(s => s.SportLocationTimeslotId == TimeslotId1 && s.ScheduledDate.Date == SelectedDate.Date);
+
+        if (schedule1 != null && schedule1.AvailableSlots > 0)
+        {
+            schedule1.AvailableSlots -= 1; // Decrement the available slots by 1 for the correct date
+        }
+
+        var schedule2 = await _context.Schedules
+            .FirstOrDefaultAsync(s => s.SportLocationTimeslotId == TimeslotId2 && s.ScheduledDate.Date == SelectedDate.Date);
+
+        if (schedule2 != null && schedule2.AvailableSlots > 0)
+        {
+            schedule2.AvailableSlots -= 1; // Decrement the available slots by 1 for the correct date
+        }
+
+        // Save the changes to schedules (available slots)
+        if (schedule1 != null) _context.Update(schedule1);
+        if (schedule2 != null) _context.Update(schedule2);
+
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
         NavigationManager.NavigateTo($"/pay?bookingId={booking.Id}");

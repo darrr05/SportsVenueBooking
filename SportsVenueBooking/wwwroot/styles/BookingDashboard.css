@@ -114,7 +114,7 @@ h1 {
 
 .modal-title {
     font-size: 20px;
-    color: #fff; /* White text for modal title */
+    color: black;
 }
 
 .close {
@@ -129,7 +129,7 @@ h1 {
 }
 
     .modal-body label {
-        color: #ddd; /* Light gray label for form elements */
+        color: black;
     }
 
     .modal-body textarea {
@@ -137,7 +137,7 @@ h1 {
         width: 100%;
         border: 1px solid #ddd;
         border-radius: 5px;
-        color: #333; /* Dark text for better readability in textarea */
+        color: black; /* Dark text for better readability in textarea */
     }
 
 /* Modal Footer Buttons */

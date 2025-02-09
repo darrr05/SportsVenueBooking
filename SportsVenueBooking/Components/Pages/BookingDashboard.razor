@@ -118,16 +118,11 @@ else
             .Include(b => b.SportLocationTimeslot1)
                 .ThenInclude(slt => slt.Timeslot)
             .Include(b => b.SportLocationTimeslot2)
-                .ThenInclude(slt => slt.SportLocation)
-                    .ThenInclude(sl => sl.Sport)
-            .Include(b => b.SportLocationTimeslot2)
-                .ThenInclude(slt => slt.SportLocation)
-                    .ThenInclude(sl => sl.Location)
-            .Include(b => b.SportLocationTimeslot2)
                 .ThenInclude(slt => slt.Timeslot)
             .Where(b => b.CustomerId == customerId)
             .ToListAsync();
     }
+
 
     private void OpenCancellationModal(int bookingId)
     {
@@ -148,7 +143,6 @@ else
         if (string.IsNullOrEmpty(CancellationReason))
         {
             // Show a warning if no cancellation reason is provided
-            // Optionally, add a toast or error message
             return;
         }
 
@@ -160,6 +154,35 @@ else
             booking.CancellationDate = DateTime.Now;
             booking.CancellationReason = CancellationReason;
 
+            // Increment the schedule availability (if needed)
+            if (booking.SportLocationTimeslot1 != null)
+            {
+                var sportLocationTimeslot1 = booking.SportLocationTimeslot1;
+                var schedule1 = await _context.Schedules
+                    .FirstOrDefaultAsync(s => s.SportLocationTimeslotId == sportLocationTimeslot1.Id);
+
+                if (schedule1 != null)
+                {
+                    // Increment or update the schedule to reflect the cancellation
+                    schedule1.AvailableSlots += 1; // Adjust this logic based on how your schedule is set up
+                    _context.Schedules.Update(schedule1);
+                }
+            }
+
+            if (booking.SportLocationTimeslot2 != null)
+            {
+                var sportLocationTimeslot2 = booking.SportLocationTimeslot2;
+                var schedule2 = await _context.Schedules
+                    .FirstOrDefaultAsync(s => s.SportLocationTimeslotId == sportLocationTimeslot2.Id);
+
+                if (schedule2 != null)
+                {
+                    // Increment or update the schedule to reflect the cancellation
+                    schedule2.AvailableSlots += 1; // Adjust this logic based on your schedule setup
+                    _context.Schedules.Update(schedule2);
+                }
+            }
+
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
 
@@ -168,6 +191,7 @@ else
             CloseCancellationModal();
         }
     }
+
 
     private void GoToPayment(int bookingId)
     {

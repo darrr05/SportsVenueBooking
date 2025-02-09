@@ -66,21 +66,26 @@
     private IQueryable<SportLocationTimeslot> FilteredSportLocationTimeslots => context.SportLocationTimeslots.Where(slt =>
     slt.SportLocation.Sport.Name.Contains(searchText));
 
-    // GetSportString method to get the sport string
     private string GetSportString(int SportLocationId)
     {
-        var sport = Sports.FirstOrDefault(s => s.Id == SportLocationId);
-        return sport == null ?
-        string.Empty : $"{sport.Name}";
+        var sportLocation = SportLocations.FirstOrDefault(sl => sl.Id == SportLocationId);
+        if (sportLocation == null) return string.Empty;
+
+        var sport = Sports.FirstOrDefault(s => s.Id == sportLocation.SportId);
+        return sport?.Name ?? string.Empty;
     }
+
 
     // GetLocationString method to get the location string
     private string GetLocationString(int SportLocationId)
     {
-        var location = Locations.FirstOrDefault(l => l.Id == SportLocationId);
-        return location == null ?
-        string.Empty : $"{location.Name}";
+        var sportLocation = SportLocations.FirstOrDefault(sl => sl.Id == SportLocationId);
+        if (sportLocation == null) return string.Empty;
+
+        var location = Locations.FirstOrDefault(l => l.Id == sportLocation.LocationId);
+        return location?.Name ?? string.Empty;
     }
+
 
     // Get Timeslot String method to get the timeslot string
     private string GetTimeslotString(int timeslotId)
